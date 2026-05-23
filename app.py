@@ -21,16 +21,21 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp3', 'wav', 'm4a', 'ogg', 'webm'}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sheikh.db'
 
+import os
 
+# Render PostgreSQL-ის მხარდაჭერა
 database_url = os.environ.get('DATABASE_URL')
 if database_url:
-    # PostgreSQL-ის URL-ის ფორმატირება
+    # PostgreSQL-ის URL-ის სწორი ფორმატი
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sheikh.db'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
