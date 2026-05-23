@@ -1,0 +1,1173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+:root {
+    --gold: #D4AF37;
+    --gold-dark: #996515;
+    --gold-light: #F3E5AB;
+    --dark: #1a1a1a;
+    --bg-dark: #0a0a0a;
+    --card-bg: #ffffff;
+    --text-light: #7a7a7a;
+    --text-gray: #555;
+    --danger: #dc3545;
+    --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 20px 35px -8px rgba(0, 0, 0, 0.1);
+    --shadow-gold: 0 15px 35px rgba(212, 175, 55, 0.12);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Admin Container */
+.admin-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+@media (max-width: 992px) {
+    .admin-container {
+        grid-template-columns: 220px 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        grid-template-columns: 1fr;
+    }
+    .admin-sidebar {
+        display: none;
+    }
+}
+
+/* Sidebar */
+.admin-sidebar {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    border-right: 1px solid rgba(212,175,55,0.2);
+    padding: 30px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.admin-logo {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
+
+.admin-logo h2 {
+    color: var(--gold);
+    font-size: 24px;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 2px;
+}
+
+.admin-user {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+}
+
+.admin-user i {
+    font-size: 50px;
+    color: var(--gold);
+    margin-bottom: 10px;
+}
+
+.admin-user p {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+/* Admin Menu */
+.admin-menu {
+    list-style: none;
+    padding: 0;
+}
+
+.admin-menu-item {
+    margin: 5px 15px;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.admin-menu-item.active {
+    background: rgba(212,175,55,0.15);
+}
+
+.admin-menu-item:hover {
+    background: rgba(212,175,55,0.1);
+}
+
+.admin-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-gray);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    border-radius: 10px;
+}
+
+.admin-menu-link i {
+    width: 24px;
+    color: var(--gold);
+    font-size: 18px;
+}
+
+.admin-menu-item.active .admin-menu-link,
+.admin-menu-link:hover {
+    color: var(--gold);
+}
+
+/* Main Content */
+.admin-main {
+    padding: 40px;
+    background: linear-gradient(135deg, #f8f6f2 0%, #f0ece4 100%);
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .admin-main {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-main {
+        padding: 15px;
+    }
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.admin-title {
+    font-size: 32px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--dark);
+    margin: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.admin-title:after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+@media (max-width: 768px) {
+    .admin-title {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-title {
+        font-size: 22px;
+    }
+}
+
+/* Stats Grid - IMPROVED RESPONSIVE */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 35px;
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 20px;
+    padding: 22px 30px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-gold);
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        padding: 18px 22px;
+        gap: 15px;
+    }
+}
+
+.stat-icon {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 22px;
+    }
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold-dark);
+    font-family: 'Cormorant Garamond', serif;
+    line-height: 1.2;
+}
+
+@media (max-width: 480px) {
+    .stat-value {
+        font-size: 26px;
+    }
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 25px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 40px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    gap: 8px;
+}
+
+@media (max-width: 480px) {
+    .btn {
+        padding: 8px 18px;
+        font-size: 13px;
+    }
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    color: var(--text-light);
+}
+
+.btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #bd2130;
+    transform: translateY(-2px);
+}
+
+/* Small Buttons */
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+}
+
+/* Add Form */
+.add-form-container {
+    margin-bottom: 30px;
+    animation: slideDown 0.3s ease;
+}
+
+.form-card {
+    background: white;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.form-header {
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    padding: 18px 25px;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 480px) {
+    .form-header {
+        padding: 15px 20px;
+    }
+
+    .form-header h2 {
+        font-size: 18px;
+    }
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gold-icon {
+    color: var(--gold);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: var(--danger);
+}
+
+/* Form */
+.elegant-form {
+    padding: 25px;
+}
+
+@media (max-width: 480px) {
+    .elegant-form {
+        padding: 20px;
+    }
+}
+
+.form-group {
+    margin-bottom: 22px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--dark);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: var(--transition);
+    background: white;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+/* Table */
+.table-container {
+    background: white;
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 24px;
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.elegant-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+.elegant-table th {
+    background: linear-gradient(135deg, #faf8f4, #f5f2eb);
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--gold);
+}
+
+@media (max-width: 768px) {
+    .elegant-table th,
+    .elegant-table td {
+        padding: 12px 15px;
+    }
+
+    .elegant-table th {
+        font-size: 11px;
+    }
+
+    .elegant-table td {
+        font-size: 13px;
+    }
+}
+
+.elegant-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+    color: var(--text);
+    font-size: 14px;
+}
+
+.elegant-table tr:last-child td {
+    border-bottom: none;
+}
+
+.elegant-table tbody tr:hover {
+    background: rgba(212,175,55,0.03);
+}
+
+/* Table Cells */
+.id-cell {
+    font-weight: 600;
+    color: var(--gold-dark);
+    font-size: 13px;
+}
+
+.category-name {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.description-text {
+    color: var(--text-light);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.no-description {
+    color: #ccc;
+    font-style: italic;
+}
+
+.product-count {
+    display: inline-block;
+    min-width: 32px;
+    padding: 4px 10px;
+    background: #f5f2eb;
+    border-radius: 30px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.product-count.has-products {
+    background: rgba(212,175,55,0.12);
+    color: var(--gold-dark);
+}
+
+/* Action Buttons */
+.actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    background: transparent;
+    color: var(--text-light);
+}
+
+@media (max-width: 480px) {
+    .action-btn {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.edit-btn:hover {
+    background: var(--gold);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.disabled-btn {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.disabled-btn:hover {
+    transform: none;
+}
+
+.delete-form {
+    display: inline;
+}
+
+/* Edit Row */
+.edit-row td {
+    padding: 0;
+    background: #faf8f4;
+}
+
+.edit-form-container {
+    padding: 18px 20px;
+}
+
+@media (max-width: 480px) {
+    .edit-form-container {
+        padding: 15px;
+    }
+}
+
+.inline-edit-form {
+    width: 100%;
+}
+
+.edit-fields {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.edit-field {
+    flex: 1;
+    min-width: 180px;
+}
+
+@media (max-width: 600px) {
+    .edit-fields {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .edit-field {
+        min-width: auto;
+    }
+}
+
+.edit-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-light);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.edit-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.edit-field input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.edit-actions {
+    display: flex;
+    gap: 6px;
+}
+
+@media (max-width: 600px) {
+    .edit-actions {
+        justify-content: flex-end;
+        margin-top: 5px;
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 70px 20px !important;
+}
+
+.empty-state-content i {
+    font-size: 56px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-state-content h3 {
+    color: var(--dark);
+    margin-bottom: 10px;
+    font-size: 22px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+@media (max-width: 480px) {
+    .empty-state-content h3 {
+        font-size: 18px;
+    }
+
+    .empty-state-content i {
+        font-size: 48px;
+    }
+}
+
+.empty-state-content p {
+    color: var(--text-light);
+    margin-bottom: 25px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    max-width: 400px;
+    width: 90%;
+    padding: 35px;
+    border-radius: 28px;
+    text-align: center;
+    animation: modalFadeIn 0.3s ease;
+    border: 1px solid var(--gold);
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 25px;
+        width: 95%;
+    }
+
+    .modal-content h3 {
+        font-size: 18px;
+    }
+}
+
+.modal-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.modal-content h3 {
+    margin-bottom: 12px;
+    color: var(--dark);
+    font-size: 22px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.modal-content p {
+    color: var(--text-light);
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Modal Buttons - Fixed */
+.modal-actions button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.modal-actions button:hover {
+    transform: translateY(-2px);
+}
+
+.modal-actions .btn-danger {
+    background: #dc3545 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modal-actions .btn-danger:hover {
+    background: #bd2130 !important;
+}
+
+.modal-actions .btn-outline {
+    background: transparent !important;
+    border: 1px solid var(--gold) !important;
+    color: var(--gold-dark) !important;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modal-actions .btn-outline:hover {
+    background: rgba(212,175,55,0.1) !important;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Additional responsive fixes */
+@media (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-header .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="admin-container">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="admin-logo">
+            <h2>Sheikh<span style="color: white;">.ge</span></h2>
+            <p style="color: var(--text-gray); font-size: 11px; margin-top: 5px;">ადმინისტრატორი</p>
+        </div>
+
+        <div class="admin-user">
+            <i class="fas fa-user-crown"></i>
+            <p>{{ current_user.name }}</p>
+        </div>
+
+        <ul class="admin-menu">
+            <li class="admin-menu-item">
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-menu-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>დაფა</span>
+                </a>
+            </li>
+            <li class="admin-menu-item active">
+                <a href="{{ url_for('admin_categories') }}" class="admin-menu-link">
+                    <i class="fas fa-tags"></i>
+                    <span>კატეგორიები</span>
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{{ url_for('admin_products') }}" class="admin-menu-link">
+                    <i class="fas fa-box"></i>
+                    <span>პროდუქტები</span>
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{{ url_for('admin_orders') }}" class="admin-menu-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>შეკვეთები</span>
+                </a>
+            </li>
+            <li class="admin-menu-item" style="margin-top: 30px;">
+                <a href="{{ url_for('index') }}" class="admin-menu-link">
+                    <i class="fas fa-globe"></i>
+                    <span>საიტზე დაბრუნება</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <h1 class="admin-title">კატეგორიების მართვა</h1>
+            <button class="btn btn-gold" onclick="toggleAddForm()">
+                <i class="fas fa-plus"></i> ახალი კატეგორია
+            </button>
+        </div>
+
+        <!-- Stats Grid - IMPROVED -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ categories|length }}</span>
+                    <span class="stat-label">კატეგორია</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Category Form -->
+        <div id="addCategoryForm" class="add-form-container" style="display: none;">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2>
+                        <i class="fas fa-folder-plus gold-icon"></i>
+                        ახალი კატეგორიის დამატება
+                    </h2>
+                    <button class="close-btn" onclick="toggleAddForm()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form action="{{ url_for('add_category') }}" method="POST" class="elegant-form">
+                    <div class="form-group">
+                        <label for="name">კატეგორიის სახელი *</label>
+                        <input type="text" id="name" name="name" required placeholder="მაგ: ლაქშერი საათები">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">აღწერა</label>
+                        <textarea id="description" name="description" rows="3" placeholder="მოკლე აღწერა..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-gold">
+                            <i class="fas fa-save"></i> კატეგორიის შექმნა
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="toggleAddForm()">
+                            გაუქმება
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="table-container">
+            <table class="elegant-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>კატეგორიის სახელი</th>
+                        <th>აღწერა</th>
+                        <th>პროდუქტი</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr class="category-row" id="category-row-{{ category.id }}">
+                        <td class="id-cell">#{{ category.id }}</td>
+                        <td class="name-cell">
+                            <span class="category-name">{{ category.name }}</span>
+                        </td>
+                        <td class="desc-cell">
+                            {% if category.description %}
+                                <span class="description-text">{{ category.description|truncate(50) }}</span>
+                            {% else %}
+                                <span class="no-description">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="count-cell">
+                            <span class="product-count {% if category.products %}has-products{% endif %}">
+                                {{ category.products|length }}
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="action-btn edit-btn" onclick="editCategory({{ category.id }})" title="რედაქტირება">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            {% if not category.products %}
+                            <form action="{{ url_for('delete_category', category_id=category.id) }}" method="POST" class="delete-form" onsubmit="return confirmDelete('{{ category.name }}')">
+                                <button type="submit" class="action-btn delete-btn" title="წაშლა">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <button class="action-btn disabled-btn" disabled title="წაშლა შეუძლებელია (არსებობს პროდუქტები)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Edit Form Row -->
+                    <tr id="edit-{{ category.id }}" class="edit-row" style="display: none;">
+                        <td colspan="5">
+                            <div class="edit-form-container">
+                                <form action="{{ url_for('edit_category', category_id=category.id) }}" method="POST" class="inline-edit-form">
+                                    <div class="edit-fields">
+                                        <div class="edit-field">
+                                            <label>სახელი</label>
+                                            <input type="text" name="name" value="{{ category.name }}" required>
+                                        </div>
+                                        <div class="edit-field">
+                                            <label>აღწერა</label>
+                                            <input type="text" name="description" value="{{ category.description or '' }}">
+                                        </div>
+                                        <div class="edit-actions">
+                                            <button type="submit" class="btn-small btn-gold" title="შენახვა">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn-small btn-outline" onclick="hideEdit({{ category.id }})" title="გაუქმება">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-state-content">
+                                <i class="fas fa-folder-open"></i>
+                                <h3>კატეგორიები ვერ მოიძებნა</h3>
+                                <p>შექმენით თქვენი პირველი კატეგორია</p>
+                                <button class="btn btn-gold" onclick="toggleAddForm()">
+                                    <i class="fas fa-plus"></i> კატეგორიის შექმნა
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">⚠️</div>
+        <h3>კატეგორიის წაშლა?</h3>
+        <p id="deleteMessage">დარწმუნებული ხართ, რომ გსურთ ამ კატეგორიის წაშლა?</p>
+        <form id="deleteForm" method="POST" action="">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">დიახ, წაშლა</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal()">გაუქმება</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Toggle Add Category Form
+function toggleAddForm() {
+    const form = document.getElementById('addCategoryForm');
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('name').focus();
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+// Edit Category
+function editCategory(id) {
+    document.querySelectorAll('[id^="edit-"]').forEach(el => {
+        if (el.id !== `edit-${id}`) {
+            el.style.display = 'none';
+        }
+    });
+
+    const editRow = document.getElementById(`edit-${id}`);
+    if (editRow.style.display === 'none') {
+        editRow.style.display = 'table-row';
+        setTimeout(() => {
+            const input = editRow.querySelector('input[name="name"]');
+            if (input) input.focus();
+        }, 100);
+    } else {
+        editRow.style.display = 'none';
+    }
+}
+
+function hideEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'none';
+}
+
+let currentDeleteForm = null;
+
+function confirmDelete(categoryName) {
+    const modal = document.getElementById('deleteModal');
+    const message = document.getElementById('deleteMessage');
+    message.textContent = `დარწმუნებული ხართ, რომ გსურთ "${categoryName}" კატეგორიის წაშლა?`;
+    modal.style.display = 'flex';
+    currentDeleteForm = event.target.closest('form');
+    return false;
+}
+
+function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    currentDeleteForm = null;
+}
+
+// Handle delete confirmation
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    if (currentDeleteForm) {
+        e.preventDefault();
+        currentDeleteForm.submit();
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Form validation
+document.querySelectorAll('.elegant-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const nameInput = this.querySelector('input[name="name"]');
+        if (nameInput && !nameInput.value.trim()) {
+            e.preventDefault();
+            alert('გთხოვთ, შეიყვანოთ კატეგორიის სახელი');
+            nameInput.focus();
+        }
+    });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[id^="edit-"]').forEach(el => {
+            el.style.display = 'none';
+        });
+        document.getElementById('addCategoryForm').style.display = 'none';
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

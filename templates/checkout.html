@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+:root {
+    --gold: #D4AF37;
+    --gold-dark: #996515;
+    --gold-light: #F3E5AB;
+    --dark: #1a1a1a;
+    --text: #4a4a4a;
+    --text-light: #7a7a7a;
+    --danger: #dc3545;
+    --success: #28a745;
+    --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 20px 35px -8px rgba(0, 0, 0, 0.1);
+    --shadow-gold: 0 15px 35px rgba(212, 175, 55, 0.12);
+    --transition: all 0.3s ease;
+}
+
+.checkout-page {
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f8f6f2 0%, #f0ece4 100%);
+    position: relative;
+}
+
+.checkout-page::before {
+    content: '✦';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.03;
+    bottom: -50px;
+    right: -50px;
+    color: var(--gold);
+    pointer-events: none;
+}
+
+.checkout-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Header */
+.checkout-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.checkout-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+.checkout-icon i {
+    font-size: 32px;
+    color: var(--gold);
+}
+
+.checkout-header h1 {
+    font-size: 36px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--dark);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.checkout-header p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* Grid Layout */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 40px;
+}
+
+@media (max-width: 900px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Form Section */
+.checkout-form {
+    background: white;
+    border-radius: 28px;
+    padding: 35px;
+    border: 1px solid rgba(212,175,55,0.15);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.checkout-form:hover {
+    box-shadow: var(--shadow-gold);
+    border-color: rgba(212,175,55,0.3);
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gold);
+}
+
+.form-header i {
+    font-size: 24px;
+    color: var(--gold);
+}
+
+.form-header h2 {
+    font-size: 22px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--gold-dark);
+    margin: 0;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark);
+    font-size: 14px;
+}
+
+.form-group label i {
+    color: var(--gold);
+    margin-right: 8px;
+    width: 18px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 14px;
+    font-size: 14px;
+    transition: var(--transition);
+    background: #fafafa;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 550px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Order Summary */
+.order-summary {
+    background: white;
+    border-radius: 28px;
+    padding: 35px;
+    border: 1px solid rgba(212,175,55,0.15);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 120px;
+    height: fit-content;
+}
+
+@media (max-width: 900px) {
+    .order-summary {
+        position: static;
+    }
+}
+
+.summary-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gold);
+}
+
+.summary-header i {
+    font-size: 24px;
+    color: var(--gold);
+}
+
+.summary-header h2 {
+    font-size: 22px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--gold-dark);
+    margin: 0;
+}
+
+/* Cart Items */
+.cart-items {
+    max-height: 350px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+}
+
+.cart-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cart-item-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 14px;
+}
+
+.cart-item-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.cart-item-price {
+    font-weight: 700;
+    color: var(--gold-dark);
+    font-size: 16px;
+}
+
+/* Empty Cart */
+.empty-cart {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-cart i {
+    font-size: 56px;
+    color: #ddd;
+    margin-bottom: 15px;
+}
+
+.empty-cart p {
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+/* Totals */
+.totals {
+    margin: 20px 0;
+    padding: 20px 0;
+    border-top: 1px solid rgba(212,175,55,0.15);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.total-row.grand-total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(212,175,55,0.2);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.total-row.grand-total span:last-child {
+    color: var(--gold-dark);
+    font-size: 22px;
+}
+
+/* Payment Info */
+.payment-info {
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    padding: 15px;
+    border-radius: 16px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.payment-info i {
+    color: var(--gold);
+    margin-right: 8px;
+}
+
+.payment-info span {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* Buttons */
+.btn-block {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-block:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-dark);
+    padding: 12px 24px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-outline:hover {
+    background: rgba(212,175,55,0.1);
+    transform: translateY(-2px);
+}
+
+/* Back to Cart */
+.back-to-cart {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.back-to-cart a {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.back-to-cart a:hover {
+    color: var(--gold-dark);
+    text-decoration: underline;
+}
+
+/* Flash Messages */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flash-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    border-left: 3px solid #f44336;
+}
+
+.flash-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border-left: 3px solid #4caf50;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading State */
+.btn-block.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-block.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="checkout-page">
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="checkout-header">
+            <div class="checkout-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h1>შეკვეთის გაფორმება</h1>
+            <p>გთხოვთ, შეავსოთ ქვემოთ მოცემული ფორმა</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="checkout-grid">
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <div class="form-header">
+                    <i class="fas fa-truck"></i>
+                    <h2>მიწოდების ინფორმაცია</h2>
+                </div>
+
+                <form method="POST" id="checkoutForm">
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="fas fa-user"></i> სრული სახელი *
+                        </label>
+                        <input type="text" id="name" name="name" value="{{ current_user.name if current_user.is_authenticated else '' }}" required placeholder="თქვენი სრული სახელი">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class="fas fa-phone-alt"></i> ტელეფონი *
+                            </label>
+                            <input type="tel" id="phone" name="phone" value="{{ current_user.phone if current_user.is_authenticated else '' }}" required placeholder="+995 555 123 456">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i> ელ-ფოსტა
+                            </label>
+                            <input type="email" id="email" name="email" value="{{ current_user.email if current_user.is_authenticated else '' }}" placeholder="your@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">
+                            <i class="fas fa-map-marker-alt"></i> მისამართი *
+                        </label>
+                        <textarea id="address" name="address" rows="3" required placeholder="ქუჩა, შენობა, ბინის ნომერი"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">
+                                <i class="fas fa-city"></i> ქალაქი
+                            </label>
+                            <input type="text" id="city" name="city" placeholder="თბილისი">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postal_code">
+                                <i class="fas fa-mail-bulk"></i> საფოსტო კოდი
+                            </label>
+                            <input type="text" id="postal_code" name="postal_code" placeholder="0108">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">
+                            <i class="fas fa-pencil-alt"></i> შენიშვნა (არასავალდებულო)
+                        </label>
+                        <textarea id="notes" name="notes" rows="2" placeholder="დამატებითი ინფორმაცია მიწოდების შესახებ..."></textarea>
+                    </div>
+
+                    <input type="hidden" name="total" value="{{ total }}">
+
+                    <button type="submit" class="btn-block" id="checkoutBtn">
+                        <i class="fas fa-check-circle"></i> შეკვეთის გაფორმება
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <div class="summary-header">
+                    <i class="fas fa-receipt"></i>
+                    <h2>შეკვეთის დეტალები</h2>
+                </div>
+
+                {% if session.cart and session.cart|length > 0 %}
+                    <div class="cart-items">
+                        {% for product_id, item in session.cart.items() %}
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <span class="cart-item-name">{{ item.name }}</span>
+                                <div class="cart-item-meta">
+                                    <span>რაოდენობა: x{{ item.quantity }}</span>
+                                </div>
+                            </div>
+                            <div class="cart-item-price">₾{{ "%.2f"|format(item.price * item.quantity) }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="totals">
+                        <div class="total-row">
+                            <span>ქვეჯამი:</span>
+                            <span>₾{{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div class="total-row">
+                            <span>მიწოდება:</span>
+                            <span>უფასო</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>სულ გადასახდელი:</span>
+                            <span>₾{{ "%.2f"|format(total) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="payment-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>გადახდა ხდება მიწოდებისას</span>
+                    </div>
+                {% else %}
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>თქვენი კალათა ცარიელია</p>
+                        <a href="{{ url_for('shop') }}" class="btn-outline">
+                            <i class="fas fa-arrow-left"></i> მაღაზიაში დაბრუნება
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Back to Cart Link -->
+        <div class="back-to-cart">
+            <a href="{{ url_for('cart') }}">
+                <i class="fas fa-arrow-left"></i> კალათაში დაბრუნება
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
+    const name = document.getElementById('name');
+    const phone = document.getElementById('phone');
+    const address = document.getElementById('address');
+    const btn = document.getElementById('checkoutBtn');
+
+    let isValid = true;
+    let errorMsg = '';
+
+    // Reset styles
+    [name, phone, address].forEach(field => {
+        if (field) field.style.borderColor = '#e8e8e8';
+    });
+
+    if (!name.value.trim()) {
+        name.style.borderColor = '#f44336';
+        isValid = false;
+        errorMsg = 'გთხოვთ, შეიყვანოთ თქვენი სახელი';
+    } else if (!phone.value.trim()) {
+        phone.style.borderColor = '#f44336';
+        isValid = false;
+        errorMsg = 'გთხოვთ, შეიყვანოთ ტელეფონის ნომერი';
+    } else if (!address.value.trim()) {
+        address.style.borderColor = '#f44336';
+        isValid = false;
+        errorMsg = 'გთხოვთ, შეიყვანოთ მიწოდების მისამართი';
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+        alert(errorMsg);
+        return;
+    }
+
+    // Show loading state
+    btn.classList.add('loading');
+    btn.disabled = true;
+});
+
+// Phone number formatting (optional)
+const phoneInput = document.getElementById('phone');
+if (phoneInput) {
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9+]/g, '');
+        if (value.startsWith('995') && value.length > 3) {
+            value = '+' + value;
+        }
+        e.target.value = value;
+    });
+}
+</script>
+{% endblock %}

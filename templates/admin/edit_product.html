@@ -1,0 +1,535 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <h1>Edit Product: <span class="gold-text">{{ product.name }}</span></h1>
+        <p class="header-subtitle">Update product information</p>
+    </div>
+
+    <!-- Admin Navigation -->
+    <div class="admin-nav">
+        <ul>
+            <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+            <li><a href="{{ url_for('admin_products') }}" class="active">Products</a></li>
+            <li><a href="{{ url_for('admin_categories') }}">Categories</a></li>
+        </ul>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="edit-form">
+        <form action="{{ url_for('edit_product', product_id=product.id) }}" method="POST" enctype="multipart/form-data">
+            <!-- Basic Info -->
+            <div class="form-group">
+                <label for="name">Product Name *</label>
+                <input type="text" id="name" name="name" value="{{ product.name }}" required placeholder="e.g., Royal Gold Watch">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="5" required placeholder="Product description...">{{ product.description }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="price">Price ($) *</label>
+                    <input type="number" id="price" name="price" step="0.01" value="{{ product.price }}" required placeholder="0.00">
+                </div>
+
+                <div class="form-group half">
+                    <label for="category_id">Category *</label>
+                    <select id="category_id" name="category_id" required>
+                        <option value="">Select category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Product Options -->
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="stock">Stock Quantity</label>
+                    <input type="number" id="stock" name="stock" value="{{ product.stock|default(0) }}" min="0" placeholder="0">
+                </div>
+
+                <div class="form-group half">
+                    <label>Product Status</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="is_new" {% if product.is_new %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            New Arrival
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="is_featured" {% if product.is_featured %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            Featured
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Image -->
+            <div class="form-group">
+                <label>Current Image</label>
+                <div class="current-image">
+                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+                </div>
+            </div>
+
+            <!-- New Image Upload -->
+            <div class="form-group">
+                <label for="image">Change Image (optional)</label>
+                <div class="file-upload">
+                    <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(this)">
+                    <div class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Click to upload new image</span>
+                    </div>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-gold">Update Product</button>
+                <a href="{{ url_for('admin_products') }}" class="btn btn-outline">Cancel</a>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete "{{ product.name }}"?</p>
+        <div class="modal-actions">
+            <form action="{{ url_for('delete_product', product_id=product.id) }}" method="POST">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            </form>
+            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Simple & Clean Admin Styles */
+:root {
+    --gold: #C5A059;
+    --gold-dark: #A88948;
+    --white: #FFFFFF;
+    --offwhite: #FAF9F6;
+    --lightgray: #E5E5E5;
+    --gray: #666666;
+    --dark: #1A1A1A;
+    --danger: #dc3545;
+}
+
+.admin-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.admin-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    font-size: 32px;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.gold-text {
+    color: var(--gold);
+}
+
+.header-subtitle {
+    color: var(--gray);
+}
+
+/* Navigation */
+.admin-nav {
+    background: var(--white);
+    border: 1px solid var(--lightgray);
+    border-radius: 50px;
+    padding: 8px;
+    margin-bottom: 30px;
+}
+
+.admin-nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    gap: 5px;
+}
+
+.admin-nav a {
+    display: block;
+    padding: 10px 25px;
+    color: var(--gray);
+    text-decoration: none;
+    border-radius: 40px;
+    transition: all 0.3s ease;
+}
+
+.admin-nav a:hover {
+    color: var(--gold);
+    background: rgba(197,160,89,0.05);
+}
+
+.admin-nav a.active {
+    background: var(--gold);
+    color: var(--white);
+}
+
+/* Edit Form */
+.edit-form {
+    background: var(--white);
+    border: 1px solid var(--lightgray);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.form-group.half {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Labels */
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--dark);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Inputs */
+input, textarea, select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--lightgray);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: var(--white);
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(197,160,89,0.1);
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+    padding: 8px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: normal;
+    margin: 0;
+}
+
+.checkbox-label input {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--lightgray);
+    border-radius: 4px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label input:checked ~ .checkmark {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.checkmark::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+}
+
+.checkbox-label input:checked ~ .checkmark::after {
+    opacity: 1;
+}
+
+/* Current Image */
+.current-image {
+    border: 1px solid var(--lightgray);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--offwhite);
+}
+
+.current-image img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 4px;
+    display: block;
+}
+
+/* File Upload */
+.file-upload {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.file-upload input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-upload-label {
+    border: 2px dashed var(--lightgray);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    color: var(--gray);
+    transition: all 0.3s ease;
+    background: var(--offwhite);
+}
+
+.file-upload-label i {
+    font-size: 24px;
+    color: var(--gold);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.file-upload:hover .file-upload-label {
+    border-color: var(--gold);
+    background: rgba(197,160,89,0.02);
+}
+
+/* Image Preview */
+.image-preview {
+    margin-top: 10px;
+    display: none;
+}
+
+.image-preview img {
+    max-width: 150px;
+    border-radius: 4px;
+    border: 1px solid var(--lightgray);
+    padding: 5px;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--lightgray);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 30px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 40px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-gold {
+    background: var(--gold);
+    color: var(--white);
+}
+
+.btn-gold:hover {
+    background: var(--gold-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(197,160,89,0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--lightgray);
+    color: var(--gray);
+}
+
+.btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #bd2130;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220,53,69,0.3);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--white);
+    max-width: 400px;
+    width: 90%;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-bottom: 15px;
+    color: var(--dark);
+}
+
+.modal-content p {
+    color: var(--gray);
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-nav ul {
+        flex-direction: column;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .form-group.half {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Image preview function
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            preview.appendChild(img);
+            preview.style.display = 'block';
+        };
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Delete confirmation
+function confirmDelete() {
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value;
+    const price = document.getElementById('price').value;
+    const category = document.getElementById('category_id').value;
+
+    if (!name || !price || !category) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+    }
+});
+</script>
+{% endblock %}

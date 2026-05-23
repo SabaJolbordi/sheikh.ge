@@ -1,0 +1,848 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+:root {
+    --gold: #D4AF37;
+    --gold-light: #F3E5AB;
+    --gold-dark: #996515;
+    --dark: #1a1a1a;
+    --text: #4a4a4a;
+    --text-light: #7a7a7a;
+    --card-bg: #ffffff;
+    --shadow-gold: 0 15px 35px rgba(212, 175, 55, 0.12);
+    --shadow-lg: 0 25px 45px -12px rgba(0, 0, 0, 0.15);
+    --transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Breadcrumb */
+.luxury-breadcrumb {
+    margin: 20px 0 30px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+
+.luxury-breadcrumb a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.luxury-breadcrumb a:hover {
+    color: var(--gold);
+}
+
+.luxury-breadcrumb i {
+    margin: 0 12px;
+    font-size: 10px;
+    color: var(--gold);
+}
+
+.luxury-breadcrumb .current {
+    color: var(--gold);
+    font-weight: 500;
+}
+
+/* Product Main Layout */
+.product-luxury-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    margin: 40px 0 60px;
+}
+
+@media (max-width: 900px) {
+    .product-luxury-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+
+/* Gallery Section */
+.gallery-luxury {
+    position: relative;
+}
+
+.main-image-luxury {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #f8f6f2, #f0ece4);
+    cursor: zoom-in;
+    border: 1px solid rgba(212,175,55,0.2);
+    transition: var(--transition);
+}
+
+.main-image-luxury:hover {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-gold);
+}
+
+.main-image-luxury img {
+    width: 100%;
+    height: 520px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.main-image-luxury.zoomed img {
+    transform: scale(1.8);
+}
+
+.zoom-icon {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 18px;
+    pointer-events: none;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.main-image-luxury:hover .zoom-icon {
+    opacity: 1;
+}
+
+/* Thumbnails */
+.thumbnails-luxury {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.thumbnail-luxury {
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    aspect-ratio: 1/1;
+    background: #f5f2eb;
+}
+
+.thumbnail-luxury img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.thumbnail-luxury:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+}
+
+.thumbnail-luxury.active {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-gold);
+}
+
+/* Product Info Section */
+.product-info-luxury {
+    padding: 0 10px;
+}
+
+.product-badge-luxury {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+    padding: 6px 18px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.product-title-luxury {
+    font-size: 42px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.product-price-luxury {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--gold-dark);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.product-price-luxury small {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: normal;
+}
+
+/* Short Description */
+.short-desc-luxury {
+    background: linear-gradient(135deg, rgba(212,175,55,0.05), rgba(212,175,55,0.02));
+    padding: 25px;
+    border-radius: 20px;
+    border-left: 3px solid var(--gold);
+    margin-bottom: 30px;
+}
+
+.short-desc-luxury p {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* Order Form */
+.order-form-luxury {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid rgba(212,175,55,0.3);
+    margin-bottom: 30px;
+}
+
+.order-form-luxury h3 {
+    color: var(--gold);
+    font-size: 20px;
+    margin-bottom: 25px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Quantity Selector */
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.quantity-selector label {
+    color: var(--text-light);
+    font-size: 14px;
+    min-width: 70px;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 40px;
+    overflow: hidden;
+}
+
+.quantity-btn {
+    background: none;
+    border: none;
+    color: var(--gold);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.quantity-btn:hover {
+    background: rgba(212,175,55,0.1);
+}
+
+.quantity-input {
+    width: 60px;
+    text-align: center;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+}
+
+/* Form Inputs */
+.form-input-luxury {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-input-luxury:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.08);
+}
+
+.form-input-luxury::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Tabs Section */
+.tabs-luxury {
+    margin: 60px 0;
+}
+
+.tabs-header-luxury {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid rgba(212,175,55,0.2);
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.tab-btn-luxury {
+    background: none;
+    border: none;
+    padding: 15px 35px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.tab-btn-luxury:hover {
+    color: var(--gold);
+}
+
+.tab-btn-luxury.active {
+    color: var(--gold);
+}
+
+.tab-btn-luxury.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gold);
+}
+
+.tab-content-luxury {
+    display: none;
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(212,175,55,0.1);
+    animation: fadeIn 0.4s ease;
+}
+
+.tab-content-luxury.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content-luxury h3 {
+    color: var(--gold-dark);
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Specifications Table */
+.spec-table {
+    width: 100%;
+}
+
+.spec-table tr {
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+}
+
+.spec-table td {
+    padding: 15px;
+    color: var(--text);
+}
+
+.spec-table td:first-child {
+    font-weight: 600;
+    color: var(--dark);
+    width: 150px;
+}
+
+/* Success Modal */
+.luxury-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+    max-width: 450px;
+    width: 90%;
+    padding: 45px 35px;
+    border-radius: 30px;
+    border: 1px solid var(--gold);
+    text-align: center;
+    animation: modalPop 0.4s ease;
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-icon {
+    font-size: 70px;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.modal-content h3 {
+    color: var(--gold);
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    color: var(--text-light);
+    margin-bottom: 25px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn-gold-luxury {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border: none;
+    padding: 14px 30px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    font-size: 16px;
+}
+
+.btn-gold-luxury:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+}
+
+.btn-outline-luxury {
+    background: transparent;
+    border: 1px solid var(--gold);
+    padding: 12px 25px;
+    border-radius: 40px;
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-outline-luxury:hover {
+    background: var(--gold);
+    color: white;
+}
+
+/* Extra Info Icons */
+.extra-info {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.extra-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.extra-info-item i {
+    color: var(--gold);
+    font-size: 14px;
+}
+
+.extra-info-item span {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-title-luxury {
+        font-size: 32px;
+    }
+    .product-price-luxury {
+        font-size: 36px;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .tab-content-luxury {
+        padding: 25px;
+    }
+    .tab-btn-luxury {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    .main-image-luxury img {
+        height: 380px;
+    }
+    .spec-table td {
+        padding: 12px;
+    }
+    .spec-table td:first-child {
+        width: 110px;
+    }
+}
+</style>
+
+<div class="container" style="max-width: 1300px; margin: 0 auto; padding: 0 20px;">
+
+    <!-- Breadcrumb -->
+    <div class="luxury-breadcrumb">
+        <a href="{{ url_for('index') }}">მთავარი</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="{{ url_for('shop') }}">მაღაზია</a>
+        {% if product.category %}
+        <i class="fas fa-chevron-right"></i>
+        <a href="{{ url_for('shop', category=product.category.id) }}">{{ product.category.name }}</a>
+        {% endif %}
+        <i class="fas fa-chevron-right"></i>
+        <span class="current">{{ product.name }}</span>
+    </div>
+
+    <!-- Product Main Section -->
+    <div class="product-luxury-grid">
+
+        <!-- Gallery Section -->
+        <div class="gallery-luxury">
+            <div class="main-image-luxury" onclick="toggleZoom(this)">
+                <img src="{% if product.image %}{{ url_for('static', filename=product.image) }}{% else %}https://via.placeholder.com/800x800?text=No+Image{% endif %}"
+                     alt="{{ product.name }}"
+                     id="mainImage">
+                <div class="zoom-icon">
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+
+            <div class="thumbnails-luxury">
+                <div class="thumbnail-luxury active" onclick="changeImage(this, '{% if product.image %}{{ url_for('static', filename=product.image) }}{% else %}https://via.placeholder.com/800x800?text=No+Image{% endif %}')">
+                    <img src="{% if product.image %}{{ url_for('static', filename=product.image) }}{% else %}https://via.placeholder.com/200x200?text=No+Image{% endif %}" alt="მთავარი ფოტო">
+                </div>
+                {% if product.additional_images %}
+                    {% for image in product.additional_images %}
+                    <div class="thumbnail-luxury" onclick="changeImage(this, '{{ url_for('static', filename='images/products/' + image.image_url) }}')">
+                        <img src="{{ url_for('static', filename='images/products/' + image.image_url) }}" alt="დამატებითი ფოტო">
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info Section -->
+        <div class="product-info-luxury">
+            {% if product.is_new %}
+            <div class="product-badge-luxury">
+                <i class="fas fa-star" style="margin-right: 5px;"></i> ახალი კოლექცია
+            </div>
+            {% endif %}
+
+            <h1 class="product-title-luxury">{{ product.name }}</h1>
+
+            <div class="product-price-luxury">
+                ₾{{ "%.2f"|format(product.price) }}
+                {% if product.old_price %}
+                <small><del>₾{{ "%.2f"|format(product.old_price) }}</del></small>
+                {% endif %}
+            </div>
+
+            {% if product.short_description %}
+            <div class="short-desc-luxury">
+                <p>{{ product.short_description }}</p>
+            </div>
+            {% elif product.description %}
+            <div class="short-desc-luxury">
+                <p>{{ product.description|truncate(150) }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Order Form -->
+            <div class="order-form-luxury">
+                <h3><i class="fas fa-crown" style="margin-right: 8px;"></i> შეკვეთის განთავსება</h3>
+
+                <form id="orderForm" method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+                    <div class="quantity-selector">
+                        <label><i class="fas fa-box"></i> რაოდენობა:</label>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn" onclick="decrementQuantity()">−</button>
+                            <input type="number" name="quantity" id="quantity" value="1" min="1" max="10" class="quantity-input" readonly>
+                            <button type="button" class="quantity-btn" onclick="incrementQuantity()">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" name="name" placeholder="სრული სახელი" required class="form-input-luxury">
+                        <input type="tel" name="phone" placeholder="ტელეფონის ნომერი" required class="form-input-luxury">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <input type="email" name="email" placeholder="ელ-ფოსტა" required class="form-input-luxury">
+                    </div>
+
+                    <button type="submit" class="btn-gold-luxury">
+                        <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i>
+                        კალათაში დამატება
+                    </button>
+
+                    <p style="text-align: center; margin-top: 18px; color: rgba(255,255,255,0.5); font-size: 12px;">
+                        <i class="fas fa-shield-alt" style="color: var(--gold); margin-right: 5px;"></i>
+                        უსაფრთხო შეკვეთა. დაგიკავშირდებით 24 საათში.
+                    </p>
+                </form>
+            </div>
+
+            <!-- Extra Info -->
+            <div class="extra-info">
+                <div class="extra-info-item">
+                    <i class="fas fa-truck"></i>
+                    <span>უფასო მიწოდება</span>
+                </div>
+                <div class="extra-info-item">
+                    <i class="fas fa-undo-alt"></i>
+                    <span>14 დღიანი დაბრუნება</span>
+                </div>
+                <div class="extra-info-item">
+                    <i class="fas fa-certificate"></i>
+                    <span>პრემიუმ ხარისხი</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-luxury">
+        <div class="tabs-header-luxury">
+            <button class="tab-btn-luxury active" onclick="switchTab('description')">აღწერა</button>
+            <button class="tab-btn-luxury" onclick="switchTab('details')">დეტალები</button>
+            <button class="tab-btn-luxury" onclick="switchTab('shipping')">მიწოდება და დაბრუნება</button>
+        </div>
+
+        <!-- Description Tab -->
+        <div id="tab-description" class="tab-content-luxury active">
+            <h3>პროდუქტის აღწერა</h3>
+            <div style="color: var(--text); line-height: 1.8;">
+                {% if product.full_description %}
+                    {{ product.full_description|safe }}
+                {% elif product.description %}
+                    <p>{{ product.description }}</p>
+                {% else %}
+                    <p>პროდუქტის დეტალური აღწერა მალე დაემატება.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Details Tab -->
+        <div id="tab-details" class="tab-content-luxury">
+            <h3>პროდუქტის მახასიათებლები</h3>
+            <table class="spec-table">
+                {% if product.category %}
+                <tr>
+                    <td>კატეგორია</td>
+                    <td>{{ product.category.name }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>ხელმისაწვდომობა</td>
+                    <td><span style="color: #4CAF50;"><i class="fas fa-check-circle"></i> მარაგშია</span></td>
+                </tr>
+                <tr>
+                    <td>მდგომარეობა</td>
+                    <td>100% ორიგინალი</td>
+                </tr>
+                {% if product.created_at %}
+                <tr>
+                    <td>დამატების თარიღი</td>
+                    <td>{{ product.created_at.strftime('%d.%m.%Y') }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>ხარისხი</td>
+                    <td>პრემიუმ</td>
+                </tr>
+                <tr>
+                    <td>გარანტია</td>
+                    <td>2 წელი</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Shipping Tab -->
+        <div id="tab-shipping" class="tab-content-luxury">
+            <h3>მიწოდების და დაბრუნების პოლიტიკა</h3>
+            <div style="color: var(--text); line-height: 1.8;">
+                <p><strong><i class="fas fa-truck" style="color: var(--gold); margin-right: 8px;"></i> უფასო მიწოდება</strong> - უფასო მიწოდება საქართველოს მასშტაბით.</p>
+                <p style="margin-top: 15px;"><strong><i class="fas fa-clock" style="color: var(--gold); margin-right: 8px;"></i> მიწოდების დრო</strong> - 2-4 სამუშაო დღე თბილისში, 3-7 სამუშაო დღე რეგიონებში.</p>
+                <p style="margin-top: 15px;"><strong><i class="fas fa-undo-alt" style="color: var(--gold); margin-right: 8px;"></i> დაბრუნების პოლიტიკა</strong> - 14 დღის განმავლობაში შეგიძლიათ დააბრუნოთ პროდუქტი, თუ ის არის მოუხმარი და ორიგინალურ შეფუთვაში.</p>
+                <p style="margin-top: 15px;"><strong><i class="fas fa-headset" style="color: var(--gold); margin-right: 8px;"></i> მხარდაჭერა</strong> - 24/7 მხარდაჭერა ტელეფონით ან ელ-ფოსტით.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="luxury-modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>კალათაში დაემატა!</h3>
+        <p>პროდუქტი წარმატებით დაემატა თქვენს კალათაში.</p>
+        <div class="modal-buttons">
+            <button onclick="closeModal()" class="btn-outline-luxury">გაგრძელება</button>
+            <a href="{{ url_for('cart') }}" class="btn-gold-luxury" style="padding: 12px 25px; text-decoration: none;">კალათაში გადასვლა</a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Image Gallery
+function changeImage(thumbnail, imageUrl) {
+    document.getElementById('mainImage').src = imageUrl;
+
+    document.querySelectorAll('.thumbnail-luxury').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnail.classList.add('active');
+}
+
+// Zoom Function
+function toggleZoom(container) {
+    container.classList.toggle('zoomed');
+}
+
+// Quantity Functions
+function incrementQuantity() {
+    const input = document.getElementById('quantity');
+    let value = parseInt(input.value);
+    if (value < 10) {
+        input.value = value + 1;
+    }
+}
+
+function decrementQuantity() {
+    const input = document.getElementById('quantity');
+    let value = parseInt(input.value);
+    if (value > 1) {
+        input.value = value - 1;
+    }
+}
+
+// Tab Switching
+function switchTab(tabName) {
+    const tabs = ['description', 'details', 'shipping'];
+    tabs.forEach(tab => {
+        const content = document.getElementById(`tab-${tab}`);
+        const btn = document.querySelector(`.tab-btn-luxury[onclick="switchTab('${tab}')"]`);
+        if (tab === tabName) {
+            if (content) content.classList.add('active');
+            if (btn) btn.classList.add('active');
+        } else {
+            if (content) content.classList.remove('active');
+            if (btn) btn.classList.remove('active');
+        }
+    });
+}
+
+// Form Submission
+const orderForm = document.getElementById('orderForm');
+if (orderForm) {
+    orderForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> მიმდინარეობს...';
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(this);
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('successModal').style.display = 'flex';
+                document.getElementById('quantity').value = '1';
+            } else {
+                alert('დაფიქსირდა შეცდომა. გთხოვთ, სცადეთ თავიდან.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('დაფიქსირდა შეცდომა. გთხოვთ, სცადეთ თავიდან.');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// Modal Functions
+function closeModal() {
+    document.getElementById('successModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('successModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

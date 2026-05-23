@@ -1,0 +1,1284 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-wrapper">
+    <!-- Sidebar - მარცხენა პანელი -->
+    <div class="chat-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="top-row">
+                <div class="logo-area">
+                    <i class="fas fa-comment-dots"></i>
+                    <h2>შეტყობინებები</h2>
+                </div>
+                <span class="total-count" id="totalConversationsCount">0</span>
+            </div>
+
+            <!-- ძებნის ბლოკი -->
+            <div class="search-users-card">
+                <div class="search-users-header">
+                    <i class="fas fa-users"></i>
+                    <span>მომხმარებლების ძებნა</span>
+                </div>
+                <div class="search-users-input-wrapper">
+                    <i class="fas fa-search input-icon"></i>
+                    <input type="text" id="userSearchInput" placeholder="სახელი, Email ან ტელეფონი..."
+                           onkeypress="if(event.key==='Enter') searchUsers()">
+                    <button onclick="searchUsers()" class="search-users-icon-btn">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="search-results-card"></div>
+            </div>
+
+            <!-- ფილტრები -->
+            <div class="filter-tabs">
+                <button class="filter-chip active" onclick="filterConversations('all', this)">ყველა</button>
+                <button class="filter-chip" onclick="filterConversations('unread', this)">
+                    წაუკითხავი
+                    <span class="badge" id="unreadCountBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- საუბრების სია -->
+        <div class="messages-list" id="conversationsList">
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <p>საუბრები არ არის</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ჩატის მთავარი არე -->
+    <div class="chat-main">
+        <div class="chat-header-top">
+            <button class="menu-toggle" id="menuToggleBtn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <div class="chat-placeholder" id="chatPlaceholder">
+            <div class="placeholder-content">
+                <div class="placeholder-orb">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <h3>აირჩიეთ საუბარი</h3>
+                <p>მარცხნივ აირჩიეთ მომხმარებელი პასუხის დასაწერად</p>
+            </div>
+        </div>
+
+        <div class="chat-active" id="chatActive" style="display: none;">
+            <div class="chat-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="chatAvatar"></div>
+                    <div class="user-details">
+                        <h3 id="chatUserName"></h3>
+                        <div class="user-meta">
+                            <span id="userStatus"></span>
+                            <span class="dot-separator">•</span>
+                            <span id="userEmail"></span>
+                        </div>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="deleteCurrentConversation()" title="წაშლა">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div id="conversationMessagesDisplay"></div>
+            </div>
+
+            <div class="reply-container">
+                <div class="reply-input-group">
+                    <textarea id="replyText" placeholder="დაწერეთ შეტყობინება..." rows="1"></textarea>
+                    <button onclick="sendTextReply()" class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ========== სრული სტილი ========== */
+:root {
+    --gold: #C5A059;
+    --gold-dark: #A88948;
+    --gold-light: #D4B87A;
+    --bg-gray: #F0F2F5;
+    --white: #FFFFFF;
+    --border-light: #E4E6EB;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.chat-wrapper {
+    display: flex;
+    height: calc(100vh - 100px);
+    background: var(--bg-gray);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* Sidebar */
+.chat-sidebar {
+    width: 380px;
+    background: var(--white);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-area i {
+    font-size: 22px;
+    color: var(--gold);
+}
+
+.logo-area h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: #1A1A1A;
+}
+
+.total-count {
+    background: var(--border-light);
+    padding: 2px 10px;
+    border-radius: 30px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Search Card */
+.search-users-card {
+    background: #F8F9FA;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-light);
+}
+
+.search-users-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+}
+
+.search-users-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-users-input-wrapper .input-icon {
+    position: absolute;
+    left: 16px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.search-users-input-wrapper input {
+    width: 100%;
+    padding: 13px 55px 13px 42px;
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    font-size: 14px;
+    background: var(--white);
+    outline: none;
+}
+
+.search-users-input-wrapper input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(197,160,89,0.15);
+}
+
+.search-users-icon-btn {
+    position: absolute;
+    right: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-users-icon-btn:hover {
+    background: var(--gold-dark);
+    transform: scale(1.05);
+}
+
+.search-results-card {
+    margin-top: 14px;
+    max-height: 260px;
+    overflow-y: auto;
+    border-radius: 16px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    display: none;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F0F2F5;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background: #F8F9FA;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-name {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-result-name i {
+    color: var(--gold);
+}
+
+.search-result-contact {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.search-result-start {
+    padding: 6px 16px;
+    background: var(--gold);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.filter-chip {
+    flex: 1;
+    padding: 8px 12px;
+    background: #F0F2F5;
+    border: none;
+    border-radius: 30px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #65676B;
+    transition: all 0.2s;
+}
+
+.filter-chip.active {
+    background: var(--gold);
+    color: white;
+}
+
+.filter-chip .badge {
+    background: rgba(255,255,255,0.3);
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-size: 10px;
+}
+
+/* Conversations List */
+.messages-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.message-item {
+    display: flex;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #F0F2F5;
+    transition: background 0.2s;
+}
+
+.message-item:hover {
+    background: #F0F2F5;
+}
+
+.message-item.unread {
+    background: rgba(197,160,89,0.08);
+}
+
+.item-avatar {
+    margin-right: 12px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.sender-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.time {
+    font-size: 11px;
+    color: #65676B;
+}
+
+.item-preview {
+    font-size: 12px;
+    color: #65676B;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unread-indicator {
+    width: 10px;
+    height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    align-self: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: var(--border-light);
+}
+
+/* Chat Main Area */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-gray);
+}
+
+.chat-header-top {
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    display: none;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--gold);
+}
+
+.chat-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-orb {
+    width: 80px;
+    height: 80px;
+    background: rgba(197,160,89,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.placeholder-orb i {
+    font-size: 32px;
+    color: var(--gold);
+}
+
+.chat-active {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-header {
+    background: var(--white);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.user-details h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.user-meta {
+    font-size: 12px;
+    color: #65676B;
+}
+
+.dot-separator {
+    margin: 0 6px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #65676B;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: #F0F2F5;
+    color: #DC3545;
+}
+
+/* Messages Container */
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#conversationMessagesDisplay {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ========== MESSAGE BUBBLES ========== */
+.message-wrapper {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.message-wrapper.admin {
+    justify-content: flex-end;
+}
+
+.message-wrapper.user {
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-bubble.admin {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.message-bubble.user {
+    background: var(--white);
+    color: #1A1A1A;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.message-bubble.user .message-header {
+    color: #999;
+}
+
+.message-bubble.admin .message-header {
+    color: rgba(255,255,255,0.8);
+}
+
+.message-sender {
+    font-weight: 600;
+}
+
+.message-text {
+    word-wrap: break-word;
+}
+
+.message-time {
+    font-size: 10px;
+    margin-top: 4px;
+    opacity: 0.7;
+    text-align: right;
+}
+
+/* Reply Area */
+.reply-container {
+    background: var(--white);
+    border-top: 1px solid var(--border-light);
+    padding: 12px 20px;
+}
+
+.reply-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.reply-input-group textarea {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 24px;
+    resize: none;
+    font-family: inherit;
+    font-size: 14px;
+    background: #F0F2F5;
+    transition: all 0.2s;
+}
+
+.reply-input-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--white);
+}
+
+.send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.send-btn:hover {
+    background: var(--gold-dark);
+    transform: scale(1.05);
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chat-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        height: 100%;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .chat-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .chat-header-top {
+        display: flex;
+    }
+
+    .message-bubble.admin,
+    .message-bubble.user {
+        max-width: 85%;
+    }
+}
+
+@media (min-width: 769px) {
+    .chat-header-top {
+        display: none;
+    }
+}
+
+/* Scrollbar */
+.messages-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track {
+    background: var(--border-light);
+}
+
+.messages-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 3px;
+}
+
+.typing-indicator {
+    padding: 10px 14px;
+    background: var(--white);
+    border-radius: 18px;
+    max-width: 70%;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #999;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+</style>
+
+<script>
+// ========== GLOBAL VARIABLES ==========
+let currentUserId = null;
+let allConversations = {};
+let currentFilter = 'all';
+let pollingInterval = null;
+let typingTimeout = null;
+let lastTypingStatus = false;
+let currentUserEmail = null;
+
+// ========== LOAD CONVERSATIONS ==========
+async function loadConversations() {
+    try {
+        const response = await fetch('/admin/api/conversations');
+        const data = await response.json();
+        allConversations = data.conversations || {};
+        renderConversationsList();
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+        renderConversationsList();
+    }
+}
+
+// ========== SEARCH USERS (FROM DATABASE) ==========
+function searchUsers() {
+    const searchTerm = document.getElementById('userSearchInput').value.trim();
+    const resultsDiv = document.getElementById('searchResults');
+
+    if (!searchTerm || searchTerm.length < 2) {
+        resultsDiv.style.display = 'none';
+        resultsDiv.innerHTML = '';
+        return;
+    }
+
+    fetch(`/admin/api/search-users?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(users => {
+            if (users.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results" style="padding:20px;text-align:center;">მომხმარებელი ვერ მოიძებნა</div>';
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            resultsDiv.innerHTML = users.map(user => `
+                <div class="search-result-item">
+                    <div class="search-result-info">
+                        <div class="search-result-name">
+                            <i class="fas fa-user-circle"></i> ${escapeHtml(user.name)}
+                        </div>
+                        <div class="search-result-contact">
+                            ${user.email ? `<i class="fas fa-envelope"></i> ${escapeHtml(user.email)}` : ''}
+                            ${user.phone ? ` <i class="fas fa-phone"></i> ${escapeHtml(user.phone)}` : ''}
+                        </div>
+                    </div>
+                    <button class="search-result-start" onclick="startChatWithUser(${user.id}, '${escapeHtml(user.name)}', '${escapeHtml(user.email || '')}')">
+                        <i class="fas fa-comment"></i> ჩატი
+                    </button>
+                </div>
+            `).join('');
+            resultsDiv.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultsDiv.innerHTML = '<div class="no-results" style="padding:20px;text-align:center;">შეცდომა ძებნისას</div>';
+            resultsDiv.style.display = 'block';
+        });
+}
+
+// ========== START CHAT WITH USER ==========
+async function startChatWithUser(userId, userName, userEmail) {
+    currentUserId = userId;
+    currentUserEmail = userEmail;
+
+    // Clear search
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('userSearchInput').value = '';
+
+    // Show chat area
+    document.getElementById('chatPlaceholder').style.display = 'none';
+    document.getElementById('chatActive').style.display = 'flex';
+
+    // Update header
+    const avatar = document.getElementById('chatAvatar');
+    avatar.innerHTML = userName.charAt(0).toUpperCase();
+
+    document.getElementById('chatUserName').innerText = userName;
+    document.getElementById('userEmail').innerHTML = userEmail || '';
+    updateUserStatus(false);
+
+    // Load conversation
+    await loadUserConversation(userId);
+
+    // Start polling for new messages
+    startPolling(userId);
+
+    // Mark as read
+    await markConversationAsRead(userId);
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+}
+
+// ========== LOAD USER CONVERSATION (INDIVIDUAL) ==========
+async function loadUserConversation(userId) {
+    try {
+        const response = await fetch(`/admin/api/user-conversation/${userId}`);
+        const data = await response.json();
+        const container = document.getElementById('conversationMessagesDisplay');
+        container.innerHTML = '';
+
+        if (!data.messages || data.messages.length === 0) {
+            container.innerHTML = `<div style="text-align:center;padding:40px;color:#999;">
+                <i class="fas fa-comment-dots" style="font-size:48px;color:#C5A059"></i>
+                <h3>ახალი საუბარი</h3>
+                <p>დაწერეთ პირველი შეტყობინება</p>
+            </div>`;
+            return;
+        }
+
+        // Sort messages by timestamp (oldest first)
+        data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+        data.messages.forEach(msg => {
+            const isAdmin = (msg.sender_type === 'admin' || msg.sender === 'admin');
+            const senderName = isAdmin ? 'ადმინისტრატორი' : (data.user_name || 'მომხმარებელი');
+            appendMessageToContainer(msg.message || msg.text, isAdmin, msg.created_at, senderName);
+        });
+
+        scrollToBottom();
+
+    } catch (error) {
+        console.error('Error loading conversation:', error);
+    }
+}
+
+// ========== APPEND SINGLE MESSAGE ==========
+function appendMessageToContainer(message, isAdmin, timestamp, senderName) {
+    const container = document.getElementById('conversationMessagesDisplay');
+    const wrapper = document.createElement('div');
+    wrapper.className = `message-wrapper ${isAdmin ? 'admin' : 'user'}`;
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = `message-bubble ${isAdmin ? 'admin' : 'user'}`;
+
+    const timeStr = formatDate(timestamp);
+
+    bubbleDiv.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender">${escapeHtml(senderName)}</span>
+            <span class="message-time">${timeStr}</span>
+        </div>
+        <div class="message-text">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
+    `;
+
+    wrapper.appendChild(bubbleDiv);
+    container.appendChild(wrapper);
+    scrollToBottom();
+}
+
+// ========== SEND TEXT REPLY (AS ADMIN) ==========
+async function sendTextReply() {
+    const textarea = document.getElementById('replyText');
+    const reply = textarea.value.trim();
+    if (!reply || !currentUserId) return;
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+
+    try {
+        const response = await fetch(`/admin/api/send-to-user/${currentUserId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `message=${encodeURIComponent(reply)}&subject=პასუხი ადმინისგან`
+        });
+
+        if (response.ok) {
+            // Append the sent message as ADMIN (right side)
+            appendMessageToContainer(reply, true, new Date().toISOString(), 'ადმინისტრატორი');
+            textarea.value = '';
+            autoResizeTextarea();
+
+            // Update conversation list preview
+            await loadConversations();
+        } else {
+            const error = await response.json();
+            console.error('Failed to send message:', error);
+            alert(error.error || 'შეცდომა გაგზავნისას');
+        }
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        alert('შეცდომა გაგზავნისას');
+    } finally {
+        sendBtn.disabled = false;
+        textarea.focus();
+    }
+}
+
+// ========== MARK CONVERSATION AS READ ==========
+async function markConversationAsRead(userId) {
+    try {
+        await fetch(`/admin/api/conversation/${userId}/mark-read`, { method: 'POST' });
+        if (allConversations[userId]) {
+            allConversations[userId].unreadCount = 0;
+            renderConversationsList();
+        }
+    } catch (error) {
+        console.error('Error marking as read:', error);
+    }
+}
+
+// ========== SEND TYPING INDICATOR ==========
+async function sendTypingIndicator(isTyping) {
+    if (!currentUserId) return;
+
+    if (isTyping === lastTypingStatus) return;
+    lastTypingStatus = isTyping;
+
+    try {
+        await fetch(`/admin/api/typing/${currentUserId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isTyping })
+        });
+    } catch (error) {
+        console.error('Error sending typing status:', error);
+    }
+}
+
+// ========== POLLING FOR NEW MESSAGES ==========
+function startPolling(userId) {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+
+    let lastMessageId = null;
+    let lastTypingStatus = false;
+
+    // Get initial message ID
+    fetch(`/admin/api/user-conversation/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                lastMessageId = data.messages[data.messages.length - 1].id;
+            }
+        })
+        .catch(console.error);
+
+    pollingInterval = setInterval(async () => {
+        if (!currentUserId || currentUserId !== userId) return;
+
+        try {
+            // Check for new messages
+            const response = await fetch(`/admin/api/user-conversation/${userId}?last_id=${lastMessageId || ''}`);
+            const data = await response.json();
+
+            if (data.messages && data.messages.length > 0) {
+                const newMessages = data.messages;
+
+                newMessages.forEach(msg => {
+                    const isAdmin = (msg.sender_type === 'admin' || msg.sender === 'admin');
+                    // Only add messages that are NOT from admin (user messages)
+                    if (!isAdmin) {
+                        const senderName = data.user_name || 'მომხმარებელი';
+                        appendMessageToContainer(msg.message || msg.text, isAdmin, msg.created_at, senderName);
+                    }
+                });
+
+                if (newMessages.length > 0) {
+                    lastMessageId = newMessages[newMessages.length - 1].id;
+                    // Mark as read when receiving new messages from user while chat is open
+                    await markConversationAsRead(userId);
+                    await loadConversations(); // Update sidebar preview
+                }
+            }
+
+            // Check typing status
+            const typingResponse = await fetch(`/admin/api/typing/${userId}/status`);
+            const typingData = await typingResponse.json();
+
+            if (typingData.isTyping !== lastTypingStatus) {
+                lastTypingStatus = typingData.isTyping;
+                if (typingData.isTyping) {
+                    showTypingIndicator();
+                } else {
+                    hideTypingIndicator();
+                }
+            }
+
+        } catch (error) {
+            console.error('Polling error:', error);
+        }
+    }, 1500);
+}
+
+// ========== TYPING INDICATOR UI ==========
+function showTypingIndicator() {
+    const container = document.getElementById('conversationMessagesDisplay');
+    let typingDiv = document.getElementById('typingIndicator');
+
+    if (!typingDiv) {
+        typingDiv = document.createElement('div');
+        typingDiv.id = 'typingIndicator';
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <span style="margin-left: 8px; font-size: 12px; color: #666;">მომხმარებელი წერს...</span>
+        `;
+        container.appendChild(typingDiv);
+        scrollToBottom();
+    }
+}
+
+function hideTypingIndicator() {
+    const typingDiv = document.getElementById('typingIndicator');
+    if (typingDiv) {
+        typingDiv.remove();
+    }
+}
+
+// ========== DELETE CONVERSATION ==========
+async function deleteCurrentConversation() {
+    if (!currentUserId || !confirm('წავშალოთ ეს საუბარი?')) return;
+
+    try {
+        const response = await fetch(`/admin/api/conversation/${currentUserId}/delete`, { method: 'POST' });
+
+        if (response.ok) {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+
+            delete allConversations[currentUserId];
+            currentUserId = null;
+            await loadConversations();
+
+            document.getElementById('chatActive').style.display = 'none';
+            document.getElementById('chatPlaceholder').style.display = 'flex';
+            document.getElementById('conversationMessagesDisplay').innerHTML = '';
+        } else {
+            alert('შეცდომა წაშლისას');
+        }
+    } catch (error) {
+        console.error('Error deleting conversation:', error);
+        alert('შეცდომა წაშლისას');
+    }
+}
+
+// ========== RENDER CONVERSATIONS LIST ==========
+function renderConversationsList() {
+    const container = document.getElementById('conversationsList');
+    const conversations = Object.values(allConversations);
+
+    document.getElementById('totalConversationsCount').innerText = conversations.length;
+
+    let filtered = conversations;
+    if (currentFilter === 'unread') {
+        filtered = conversations.filter(c => c.unreadCount > 0);
+        document.getElementById('unreadCountBadge').innerText = filtered.length;
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-inbox"></i></div><p>საუბრები არ არის</p></div>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map(conv => `
+        <div class="message-item ${conv.unreadCount > 0 ? 'unread' : ''}" onclick="openConversation(${conv.id})">
+            <div class="item-avatar"><div class="avatar">${conv.avatar || (conv.name ? conv.name.charAt(0).toUpperCase() : '?')}</div></div>
+            <div class="item-content">
+                <div class="item-header">
+                    <span class="sender-name">${escapeHtml(conv.name || 'მომხმარებელი')}</span>
+                    <span class="time">${conv.lastMessageTime || ''}</span>
+                </div>
+                <div class="item-preview">${escapeHtml(conv.lastMessage || 'დაიწყეთ საუბარი')}</div>
+            </div>
+            ${conv.unreadCount > 0 ? '<div class="unread-indicator"></div>' : ''}
+        </div>
+    `).join('');
+}
+
+// ========== OPEN CONVERSATION ==========
+async function openConversation(userId) {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+
+    currentUserId = userId;
+    const conv = allConversations[userId];
+
+    document.getElementById('chatPlaceholder').style.display = 'none';
+    document.getElementById('chatActive').style.display = 'flex';
+
+    if (conv) {
+        document.getElementById('chatAvatar').innerHTML = conv.avatar || conv.name.charAt(0).toUpperCase();
+        document.getElementById('chatUserName').innerText = conv.name || 'მომხმარებელი';
+        document.getElementById('userEmail').innerHTML = conv.email || '';
+        updateUserStatus(conv.unreadCount > 0);
+    }
+
+    await loadUserConversation(userId);
+
+    if (conv && conv.unreadCount > 0) {
+        await markConversationAsRead(userId);
+    }
+
+    startPolling(userId);
+
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+}
+
+// ========== UPDATE USER STATUS ==========
+function updateUserStatus(hasUnread) {
+    const statusSpan = document.getElementById('userStatus');
+    if (hasUnread) {
+        statusSpan.innerHTML = '🔴 წაუკითხავი';
+    } else {
+        statusSpan.innerHTML = '🟢 აქტიური';
+    }
+}
+
+// ========== FILTER CONVERSATIONS ==========
+function filterConversations(filter, element) {
+    currentFilter = filter;
+    const chips = document.querySelectorAll('.filter-chip');
+    chips.forEach(chip => chip.classList.remove('active'));
+    if (element) element.classList.add('active');
+    renderConversationsList();
+}
+
+// ========== TOGGLE SIDEBAR (MOBILE) ==========
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ========== SCROLL TO BOTTOM ==========
+function scrollToBottom() {
+    const container = document.getElementById('messagesContainer');
+    if (container) {
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 50);
+    }
+}
+
+// ========== AUTO RESIZE TEXTAREA ==========
+function autoResizeTextarea() {
+    const textarea = document.getElementById('replyText');
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+}
+
+// ========== UTILITIES ==========
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(isoString) {
+    if (!isoString) return '';
+    try {
+        const date = new Date(isoString);
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+
+        if (isToday) {
+            return date.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+        } else {
+            return date.toLocaleDateString('ka-GE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+    } catch (e) {
+        return '';
+    }
+}
+
+// ========== EVENT LISTENERS ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const replyText = document.getElementById('replyText');
+    if (replyText) {
+        replyText.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendTextReply();
+            }
+        });
+
+        replyText.addEventListener('input', function() {
+            autoResizeTextarea();
+
+            if (typingTimeout) clearTimeout(typingTimeout);
+            sendTypingIndicator(true);
+            typingTimeout = setTimeout(() => {
+                sendTypingIndicator(false);
+            }, 1000);
+        });
+
+        replyText.addEventListener('blur', function() {
+            if (typingTimeout) clearTimeout(typingTimeout);
+            sendTypingIndicator(false);
+        });
+    }
+
+    // Close search results on click outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-users-card')) {
+            const resultsDiv = document.getElementById('searchResults');
+            if (resultsDiv) {
+                resultsDiv.style.display = 'none';
+            }
+        }
+    });
+});
+
+// ========== INITIAL LOAD ==========
+loadConversations();
+
+// Cleanup polling on page unload
+window.addEventListener('beforeunload', function() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    if (currentUserId) {
+        sendTypingIndicator(false);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+:root {
+    --gold: #D4AF37;
+    --gold-light: #F3E5AB;
+    --gold-dark: #996515;
+    --dark: #1a1a1a;
+    --text: #4a4a4a;
+    --text-light: #7a7a7a;
+    --card-bg: #ffffff;
+    --bg-dark: #0a0a0a;
+    --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 20px 35px -8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 25px 45px -12px rgba(0, 0, 0, 0.15);
+    --shadow-gold: 0 15px 35px rgba(212, 175, 55, 0.12);
+    --transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Hero Section */
+.about-hero {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    padding: 120px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid var(--gold);
+}
+
+.about-hero::before {
+    content: '✦';
+    position: absolute;
+    font-size: 250px;
+    opacity: 0.03;
+    bottom: -80px;
+    right: -50px;
+    color: var(--gold);
+    pointer-events: none;
+}
+
+.about-hero::after {
+    content: '✦';
+    position: absolute;
+    font-size: 150px;
+    opacity: 0.03;
+    top: -50px;
+    left: -50px;
+    color: var(--gold);
+    pointer-events: none;
+}
+
+.about-hero h1 {
+    font-size: 56px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(212,175,55,0.3);
+}
+
+.hero-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    margin: 20px auto;
+    border-radius: 3px;
+}
+
+.about-hero p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Container */
+.container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 36px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.section-title:after {
+    content: '';
+    display: block;
+    width: 70px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    margin: 15px auto 0;
+    border-radius: 2px;
+}
+
+/* Our Story Section */
+.our-story {
+    padding: 80px 0;
+    background: var(--bg);
+}
+
+.story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.story-content {
+    padding-right: 20px;
+}
+
+.story-content h2 {
+    font-size: 32px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--gold-dark);
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.story-content h2:after {
+    margin: 12px 0 0 0;
+}
+
+.story-content p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+    color: var(--text);
+    font-size: 16px;
+}
+
+.story-image {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+.story-image:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-gold);
+}
+
+.story-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.story-image:hover img {
+    transform: scale(1.03);
+}
+
+.story-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(212,175,55,0.1), transparent);
+    pointer-events: none;
+}
+
+/* Values Section */
+.our-values {
+    padding: 80px 0;
+    background: white;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+@media (max-width: 1000px) {
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 550px) {
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.value-card {
+    text-align: center;
+    padding: 35px 25px;
+    background: linear-gradient(135deg, #fafafa, #fff);
+    border-radius: 24px;
+    transition: var(--transition);
+    border: 1px solid rgba(212,175,55,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    transform: scaleX(0);
+    transition: transform 0.5s ease;
+}
+
+.value-card:hover::before {
+    transform: scaleX(1);
+}
+
+.value-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gold);
+}
+
+.value-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    transition: var(--transition);
+}
+
+.value-card:hover .value-icon {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    transform: scale(1.05);
+}
+
+.value-card:hover .value-icon i {
+    color: white;
+}
+
+.value-icon i {
+    color: var(--gold);
+    transition: var(--transition);
+}
+
+.value-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--dark);
+}
+
+.value-card p {
+    color: var(--text-light);
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* Stats Section */
+.stats-section {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-section::before {
+    content: '✦';
+    position: absolute;
+    font-size: 180px;
+    opacity: 0.03;
+    bottom: -60px;
+    right: -40px;
+    color: var(--gold);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+@media (max-width: 800px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-item {
+    padding: 20px;
+}
+
+.stat-number {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* CTA Section */
+.cta-section {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #fff8eb 100%);
+    margin: 0 20px 60px;
+    border-radius: 60px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '✦';
+    position: absolute;
+    font-size: 150px;
+    opacity: 0.03;
+    bottom: -35px;
+    right: -35px;
+    color: var(--gold);
+}
+
+.cta-section h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--dark);
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.cta-section p {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 30px;
+}
+
+.cta-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    padding: 14px 40px;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    transition: var(--transition);
+    display: inline-block;
+    box-shadow: 0 8px 25px rgba(212,175,55,0.3);
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(212,175,55,0.4);
+    background: linear-gradient(135deg, #E5C158, #B8860B);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 38px;
+    }
+
+    .story-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .story-content {
+        padding-right: 0;
+        text-align: center;
+    }
+
+    .story-content h2 {
+        text-align: center;
+    }
+
+    .story-content h2:after {
+        margin: 12px auto 0;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .value-card {
+        padding: 25px;
+    }
+
+    .stat-number {
+        font-size: 36px;
+    }
+}
+</style>
+
+<div class="about-page">
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="about-hero-content">
+            <h1>ჩვენს შესახებ</h1>
+            <div class="hero-divider"></div>
+            <p>გაყიდვების პლათფორმა მეტი კომფორტისთვის, Sheikh.ge</p>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="our-story">
+        <div class="container">
+            <div class="story-grid">
+                <div class="story-content">
+                    <h2>Sheikh.ge-ს მოგზაურობა</h2>
+                    <p>დაარსდა თბილისში, საქართველოში, sheikh.ge გაჩნდა ხედვიდან, რომ კავკასიის რეგიონში მსოფლიო დონის ლაქშერი პროდუქტები შემოეტანა. რაც დაიწყო როგორც პატარა ბუტიკი, გადაიქცა პრემიერ დანიშნულების ადგილად მომხმარებლებისთვის, რომლებიც აფასებენ ხარისხსა და ელეგანტურობას.</p>
+                    <p>ჩვენი სახელი, "sheikh.ge", წარმოადგენს ახლო აღმოსავლური ლაქშერი ტრადიციების, ქართული სტუმართმოყვარეობისა და ევროპული დახვეწილობის სრულყოფილ ნაზავს. ჩვენ ვარჩევთ მხოლოდ საუკეთესო პროდუქტებს, რომლებიც აკმაყოფილებენ ხარისხისა და დიზაინის მკაცრ სტანდარტებს.</p>
+                    <p>ჩვენი კოლექციის თითოეული ნივთი შერჩეულია ჩვენი ექსპერტების გუნდის მიერ, რაც უზრუნველყოფს, რომ ჩვენთან შოპინგის დროს, თქვენ იღებთ მხოლოდ საუკეთესოს.</p>
+                </div>
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80" alt="Luxury Store">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="our-values">
+        <div class="container">
+            <h2 class="section-title">ჩვენი ღირებულებები</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-gem"></i></div>
+                    <h3>ხარისხი პირველ ადგილზე</h3>
+                    <p>ჩვენ არასდროს ვაკომპრომისებთ ხარისხს. თითოეული პროდუქტი გადის მკაცრ შემოწმებას.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>მომხმარებლის ნდობა</h3>
+                    <p>გრძელვადიანი ურთიერთობების დამყარება პატიოსნებითა და სანდოობით.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-globe"></i></div>
+                    <h3>გლობალური ხედვა</h3>
+                    <p>საუკეთესო საერთაშორისო ლაქშერის შემოტანა საქართველოში და მის ფარგლებს გარეთ.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-crown"></i></div>
+                    <h3>ბრწყინვალება</h3>
+                    <p>ბრწყინვალებისკენ სწრაფვა ყველაფერში, პროდუქტის შერჩევიდან დაწყებული მომხმარებლის მომსახურებით დამთავრებული.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">კმაყოფილი კლიენტი</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">პრემიუმ ბრენდი</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">ორიგინალი პროდუქტი</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">მომხმარებლის მხარდაჭერა</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2>შემოგვიერთდით</h2>
+        <p>აღმოაჩინეთ ლაქშერი სამყარო Sheikh.ge-სთან ერთად</p>
+        <a href="{{ url_for('shop') }}" class="cta-btn">დაიწყეთ შოპინგი</a>
+    </section>
+</div>
+{% endblock %}

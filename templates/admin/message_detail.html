@@ -1,0 +1,858 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="message-detail-container">
+    <div class="detail-header">
+        <div class="header-left">
+            <a href="{{ url_for('admin_messages') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Messages
+            </a>
+            <h1>Message Details</h1>
+        </div>
+        <div class="header-actions">
+            <form action="{{ url_for('delete_message', message_id=message.id) }}" method="POST"
+                  onsubmit="return confirm('Delete this message?')">
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash"></i> Delete Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Info Card -->
+    <div class="info-card">
+        <div class="info-header">
+            <div class="sender-section">
+                <div class="sender-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="sender-info">
+                    <span class="sender-name">{{ message.sender_name }}</span>
+                    <span class="sender-email">{{ message.sender_email }}</span>
+                    {% if message.is_urgent %}
+                        <span class="urgent-badge">⚡ Urgent</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="message-meta">
+                <div>Status:
+                    <span class="status-badge {{ message.status }}">
+                        {{ message.status|upper }}
+                    </span>
+                </div>
+                <div>Date: {{ message.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+            </div>
+        </div>
+
+        <div class="subject-section">
+            <strong>Subject:</strong> {{ message.subject }}
+        </div>
+
+        <div class="message-body">
+            {{ message.message|nl2br|safe }}
+        </div>
+
+        <!-- Attachments -->
+        {% if message.attachments %}
+        <div class="attachments-section">
+            <h3>Attachments</h3>
+            <div class="attachments-grid">
+                {% for attachment in message.attachments %}
+                <div class="attachment-item">
+                    {% if attachment.file_type == 'image' %}
+                        <a href="{{ url_for('static', filename=attachment.file_path) }}" target="_blank">
+                            <img src="{{ url_for('static', filename=attachment.file_path) }}" alt="Attachment">
+                        </a>
+                    {% else %}
+                        <audio controls>
+                            <source src="{{ url_for('static', filename=attachment.file_path) }}">
+                        </audio>
+                    {% endif %}
+                    <span class="filename">{{ attachment.filename }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Voice Message -->
+        {% if message.voice_message %}
+        <div class="voice-section">
+            <h3>Voice Message</h3>
+            <div class="voice-player">
+                <audio controls>
+                    <source src="{{ url_for('static', filename=message.voice_message.audio_path) }}">
+                </audio>
+                <span class="duration">Duration: {{ message.voice_message.duration }} seconds</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Reply Section -->
+    <div class="reply-section">
+        <h2>Reply to Customer</h2>
+
+        <div class="reply-tabs">
+            <button class="reply-tab active" onclick="showReplyForm('text')">
+                <i class="fas fa-keyboard"></i> Text Reply
+            </button>
+            <button class="reply-tab" onclick="showReplyForm('voice')">
+                <i class="fas fa-microphone"></i> Voice Reply
+            </button>
+        </div>
+
+        <!-- Text Reply Form -->
+        <div id="textReplyForm" class="reply-form">
+            <form method="POST" action="{{ url_for('reply_message_text', message_id=message.id) }}">
+                <textarea name="reply" rows="6" required placeholder="Type your reply here..."></textarea>
+                <button type="submit" class="btn-send">
+                    <i class="fas fa-paper-plane"></i> Send Reply
+                </button>
+            </form>
+        </div>
+
+        <!-- Voice Reply Form -->
+        <div id="voiceReplyForm" class="reply-form" style="display: none;">
+            <div class="voice-recorder" id="voiceRecorder">
+                <button type="button" class="record-btn" id="recordBtn">
+                    <i class="fas fa-microphone"></i> Start Recording
+                </button>
+                <div class="recording-status" id="recordingStatus" style="display: none;">
+                    <span class="recording-indicator"></span>
+                    Recording... <span id="recordTime">0:00</span>
+                    <button type="button" class="stop-btn" id="stopBtn">Stop</button>
+                </div>
+                <div class="preview-audio" id="previewAudio" style="display: none;">
+                    <audio id="audioPreview" controls></audio>
+                    <button type="button" class="clear-btn" onclick="clearRecording()">Cancel</button>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('reply_message_voice', message_id=message.id) }}" id="voiceReplyFormSubmit">
+                <input type="hidden" name="voice_reply" id="voiceReplyData">
+                <input type="hidden" name="voice_duration" id="voiceReplyDuration">
+                <button type="submit" class="btn-send" id="sendVoiceBtn" style="display: none;">
+                    <i class="fas fa-paper-plane"></i> Send Voice Reply
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Previous Replies -->
+    {% if message.replies %}
+    <div class="replies-section">
+        <h2>Previous Replies</h2>
+        {% for reply in message.replies %}
+        <div class="reply-card">
+            <div class="reply-header">
+                <strong>
+                    <i class="fas fa-user-shield"></i>
+                    Admin replied on {{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </strong>
+            </div>
+            <div class="reply-content">
+                {% if reply.reply_type == 'text' and reply.reply_text %}
+                    <p>{{ reply.reply_text|nl2br|safe }}</p>
+                {% elif reply.reply_type == 'voice' and reply.voice_reply_path %}
+                    <audio controls>
+                        <source src="{{ url_for('static', filename=reply.voice_reply_path) }}">
+                    </audio>
+                    <span class="duration">{{ reply.voice_duration }} seconds</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* CSS Variables */
+:root {
+    --gold: #C5A059;
+    --gold-dark: #A88948;
+    --gold-light: #D4B87A;
+}
+
+/* Container */
+.message-detail-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Detail Header - Responsive */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-left {
+    flex: 1;
+    min-width: 200px;
+}
+
+.header-left h1 {
+    font-size: 28px;
+    color: #1a1a1a;
+    margin: 10px 0 0;
+}
+
+@media (max-width: 768px) {
+    .header-left h1 {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-left h1 {
+        font-size: 20px;
+    }
+}
+
+.back-link {
+    color: #666;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    transition: color 0.3s;
+    font-size: 14px;
+}
+
+.back-link:hover {
+    color: var(--gold);
+}
+
+.header-actions {
+    flex-shrink: 0;
+}
+
+.btn-delete {
+    background: #fee;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    color: #dc3545;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-delete:hover {
+    background: #dc3545;
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .detail-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .header-actions {
+        align-self: flex-start;
+    }
+}
+
+/* Info Card - Responsive */
+.info-card {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .info-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-card {
+        padding: 15px;
+        border-radius: 12px;
+    }
+}
+
+/* Info Header - Responsive */
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 20px;
+}
+
+.sender-section {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sender-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .sender-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+.sender-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sender-name {
+    font-weight: 600;
+    font-size: 18px;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .sender-name {
+        font-size: 16px;
+    }
+}
+
+.sender-email {
+    color: #666;
+    font-size: 13px;
+    word-break: break-all;
+}
+
+.urgent-badge {
+    background: #dc3545;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.message-meta {
+    text-align: right;
+    color: #999;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .info-header {
+        flex-direction: column;
+    }
+    .message-meta {
+        text-align: left;
+    }
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.status-badge.unread { background: #ffc107; color: #333; }
+.status-badge.read { background: #28a745; color: white; }
+.status-badge.replied { background: #17a2b8; color: white; }
+
+/* Subject & Body */
+.subject-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    word-break: break-word;
+}
+
+.message-body {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+    line-height: 1.8;
+    color: #333;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+    .message-body {
+        padding: 15px;
+        font-size: 14px;
+    }
+}
+
+/* Attachments - Responsive Grid */
+.attachments-section, .voice-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.attachments-section h3, .voice-section h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.attachments-grid {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.attachment-item {
+    max-width: 200px;
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .attachment-item {
+        max-width: 100%;
+    }
+}
+
+.attachment-item img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.attachment-item audio {
+    width: 100%;
+    max-width: 250px;
+}
+
+.filename {
+    font-size: 11px;
+    color: #999;
+    display: block;
+    margin-top: 5px;
+    word-break: break-all;
+}
+
+.voice-player {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.voice-player audio {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Reply Section - Responsive */
+.reply-section {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .reply-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .reply-section {
+        padding: 15px;
+    }
+}
+
+.reply-section h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+@media (max-width: 480px) {
+    .reply-section h2 {
+        font-size: 18px;
+    }
+}
+
+/* Reply Tabs - Responsive */
+.reply-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+    flex-wrap: wrap;
+}
+
+.reply-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+    font-size: 14px;
+    border-radius: 30px 30px 0 0;
+}
+
+.reply-tab.active {
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
+}
+
+@media (max-width: 480px) {
+    .reply-tab {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    .reply-tabs {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+/* Reply Form */
+.reply-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 15px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.reply-form textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.btn-send {
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-send:hover {
+    background: var(--gold-dark);
+    transform: translateY(-2px);
+}
+
+/* Voice Recorder - Responsive */
+.voice-recorder {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 480px) {
+    .voice-recorder {
+        padding: 15px;
+    }
+}
+
+.record-btn {
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.recording-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.recording-indicator {
+    width: 12px;
+    height: 12px;
+    background: #dc3545;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.stop-btn, .clear-btn {
+    background: #fee;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #dc3545;
+    font-size: 13px;
+}
+
+.preview-audio {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.preview-audio audio {
+    max-width: 100%;
+}
+
+/* Replies Section - Responsive */
+.replies-section {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+@media (max-width: 768px) {
+    .replies-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .replies-section {
+        padding: 15px;
+    }
+}
+
+.replies-section h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+@media (max-width: 480px) {
+    .replies-section h2 {
+        font-size: 18px;
+    }
+}
+
+.reply-card {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.reply-card:last-child {
+    margin-bottom: 0;
+}
+
+.reply-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e5e5;
+    color: #666;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+.reply-content {
+    word-break: break-word;
+}
+
+.reply-content p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.reply-content audio {
+    width: 100%;
+    max-width: 300px;
+}
+
+@media (max-width: 480px) {
+    .reply-content audio {
+        max-width: 100%;
+    }
+}
+
+.duration {
+    font-size: 12px;
+    color: #666;
+}
+
+/* General improvements */
+* {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+audio {
+    max-width: 100%;
+}
+</style>
+
+<script>
+// Show reply form
+function showReplyForm(type) {
+    const textForm = document.getElementById('textReplyForm');
+    const voiceForm = document.getElementById('voiceReplyForm');
+    const tabs = document.querySelectorAll('.reply-tab');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    if (type === 'text') {
+        textForm.style.display = 'block';
+        voiceForm.style.display = 'none';
+        tabs[0].classList.add('active');
+    } else {
+        textForm.style.display = 'none';
+        voiceForm.style.display = 'block';
+        tabs[1].classList.add('active');
+    }
+}
+
+// Voice recording for admin reply
+let mediaRecorder;
+let audioChunks = [];
+let recordingTime = 0;
+let timerInterval;
+
+const recordBtn = document.getElementById('recordBtn');
+const recordingStatus = document.getElementById('recordingStatus');
+const previewAudio = document.getElementById('previewAudio');
+const recordTimeSpan = document.getElementById('recordTime');
+const voiceReplyData = document.getElementById('voiceReplyData');
+const voiceReplyDuration = document.getElementById('voiceReplyDuration');
+const sendVoiceBtn = document.getElementById('sendVoiceBtn');
+
+if (recordBtn) {
+    recordBtn.addEventListener('click', startRecording);
+}
+
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(audioBlob);
+
+            // Show preview
+            const audioPreview = document.getElementById('audioPreview');
+            audioPreview.src = url;
+            previewAudio.style.display = 'flex';
+            sendVoiceBtn.style.display = 'inline-flex';
+
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                voiceReplyData.value = reader.result;
+                voiceReplyDuration.value = recordingTime;
+            };
+            reader.readAsDataURL(audioBlob);
+
+            stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start();
+        if (recordBtn) recordBtn.style.display = 'none';
+        if (recordingStatus) recordingStatus.style.display = 'flex';
+
+        recordingTime = 0;
+        timerInterval = setInterval(() => {
+            recordingTime++;
+            const minutes = Math.floor(recordingTime / 60);
+            const seconds = recordingTime % 60;
+            if (recordTimeSpan) {
+                recordTimeSpan.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+
+    } catch (err) {
+        console.error('Error accessing microphone:', err);
+        alert('Could not access microphone. Please check permissions.');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval(timerInterval);
+        if (recordingStatus) recordingStatus.style.display = 'none';
+        if (recordBtn) recordBtn.style.display = 'inline-flex';
+    }
+}
+
+function clearRecording() {
+    if (previewAudio) previewAudio.style.display = 'none';
+    if (sendVoiceBtn) sendVoiceBtn.style.display = 'none';
+    if (voiceReplyData) voiceReplyData.value = '';
+    if (voiceReplyDuration) voiceReplyDuration.value = '';
+    const audioPreview = document.getElementById('audioPreview');
+    if (audioPreview) audioPreview.src = '';
+}
+
+if (document.getElementById('stopBtn')) {
+    document.getElementById('stopBtn').addEventListener('click', stopRecording);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,808 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+:root {
+    --gold: #D4AF37;
+    --gold-dark: #996515;
+    --gold-light: #F3E5AB;
+    --dark: #1a1a1a;
+    --text: #4a4a4a;
+    --text-light: #7a7a7a;
+    --danger: #dc3545;
+    --success: #28a745;
+    --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 20px 35px -8px rgba(0, 0, 0, 0.1);
+    --shadow-gold: 0 15px 35px rgba(212, 175, 55, 0.12);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.cart-page {
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f8f6f2 0%, #f0ece4 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.cart-page::before {
+    content: '✦';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.03;
+    bottom: -50px;
+    right: -50px;
+    color: var(--gold);
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    .cart-page {
+        padding: 30px 15px;
+    }
+
+    .cart-page::before {
+        font-size: 150px;
+        bottom: -30px;
+        right: -30px;
+    }
+}
+
+.cart-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+/* Header */
+.cart-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 480px) {
+    .cart-header {
+        margin-bottom: 25px;
+    }
+}
+
+.cart-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+@media (max-width: 480px) {
+    .cart-icon {
+        width: 55px;
+        height: 55px;
+        margin-bottom: 15px;
+    }
+
+    .cart-icon i {
+        font-size: 26px !important;
+    }
+}
+
+.cart-icon i {
+    font-size: 32px;
+    color: var(--gold);
+}
+
+.cart-header h1 {
+    font-size: 36px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--dark);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+    .cart-header h1 {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-header h1 {
+        font-size: 26px;
+    }
+}
+
+.cart-header p {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+@media (max-width: 480px) {
+    .cart-header p {
+        font-size: 12px;
+    }
+}
+
+/* Cart Table */
+.cart-content {
+    background: white;
+    border-radius: 28px;
+    border: 1px solid rgba(212,175,55,0.15);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cart-table th {
+    background: linear-gradient(135deg, #faf8f4, #f5f2eb);
+    padding: 18px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gold-dark);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--gold);
+}
+
+@media (max-width: 800px) {
+    .cart-table th {
+        display: none;
+    }
+}
+
+.cart-table td {
+    padding: 20px;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+    vertical-align: middle;
+}
+
+.cart-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Product Cell */
+.cart-product {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+@media (max-width: 480px) {
+    .cart-product {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+}
+
+.cart-product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 1px solid rgba(212,175,55,0.2);
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .cart-product-image {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+.cart-product-image:hover {
+    transform: scale(1.05);
+    border-color: var(--gold);
+}
+
+.cart-product-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+@media (max-width: 480px) {
+    .cart-product-info h3 {
+        font-size: 15px;
+    }
+}
+
+.cart-product-info .product-category {
+    font-size: 11px;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Price Cells */
+.cart-price,
+.cart-subtotal {
+    font-weight: 600;
+    color: var(--gold-dark);
+    font-size: 16px;
+}
+
+@media (max-width: 480px) {
+    .cart-price,
+    .cart-subtotal {
+        font-size: 14px;
+    }
+}
+
+/* Quantity Input */
+.quantity-form {
+    display: inline-block;
+}
+
+.quantity-input {
+    width: 70px;
+    padding: 8px 12px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+@media (max-width: 480px) {
+    .quantity-input {
+        width: 60px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+}
+
+.quantity-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+}
+
+.quantity-input:hover {
+    border-color: var(--gold);
+}
+
+/* Action Buttons */
+.remove-btn {
+    background: transparent;
+    border: 1.5px solid var(--danger);
+    color: var(--danger);
+    padding: 6px 14px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (max-width: 480px) {
+    .remove-btn {
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+}
+
+.remove-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Cart Summary */
+.cart-summary {
+    margin: 25px;
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #faf8f4, #f5f2eb);
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+@media (max-width: 700px) {
+    .cart-summary {
+        flex-direction: column;
+        text-align: center;
+        margin: 20px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-summary {
+        margin: 15px;
+        padding: 18px;
+        gap: 15px;
+    }
+}
+
+.cart-total {
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (max-width: 480px) {
+    .cart-total {
+        gap: 10px;
+    }
+}
+
+.cart-total span:first-child {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+@media (max-width: 480px) {
+    .cart-total span:first-child {
+        font-size: 16px;
+    }
+}
+
+.total-amount {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--gold-dark);
+    font-family: 'Cormorant Garamond', serif;
+}
+
+@media (max-width: 480px) {
+    .total-amount {
+        font-size: 26px;
+    }
+}
+
+.summary-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (max-width: 480px) {
+    .summary-actions {
+        gap: 10px;
+        width: 100%;
+    }
+
+    .summary-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 28px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+}
+
+@media (max-width: 480px) {
+    .btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: white;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-dark);
+}
+
+.btn-outline:hover {
+    background: rgba(212,175,55,0.1);
+    transform: translateY(-2px);
+}
+
+/* Empty Cart */
+.empty-cart {
+    text-align: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 28px;
+    border: 1px solid rgba(212,175,55,0.15);
+}
+
+@media (max-width: 768px) {
+    .empty-cart {
+        padding: 60px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .empty-cart {
+        padding: 40px 20px;
+    }
+}
+
+.empty-cart-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #fff8eb, #fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+@media (max-width: 480px) {
+    .empty-cart-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+
+    .empty-cart-icon i {
+        font-size: 38px !important;
+    }
+}
+
+.empty-cart-icon i {
+    font-size: 48px;
+    color: var(--gold);
+}
+
+.empty-cart h2 {
+    font-size: 28px;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--dark);
+    margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+    .empty-cart h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .empty-cart h2 {
+        font-size: 20px;
+    }
+}
+
+.empty-cart p {
+    color: var(--text-light);
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+@media (max-width: 480px) {
+    .empty-cart p {
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Flash Messages */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width: 480px) {
+    .flash-message {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+}
+
+.flash-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border-left: 3px solid #4caf50;
+}
+
+.flash-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    border-left: 3px solid #f44336;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Table - Mobile First */
+@media (max-width: 800px) {
+    .cart-table,
+    .cart-table thead,
+    .cart-table tbody,
+    .cart-table th,
+    .cart-table td,
+    .cart-table tr {
+        display: block;
+    }
+
+    .cart-table thead {
+        display: none;
+    }
+
+    .cart-table tr {
+        position: relative;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(212,175,55,0.1);
+        padding: 15px;
+    }
+
+    .cart-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: none;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .cart-table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--gold-dark);
+        font-size: 13px;
+        text-transform: uppercase;
+        min-width: 100px;
+    }
+
+    .cart-product {
+        flex-direction: row;
+        text-align: left;
+        flex: 1;
+    }
+}
+
+@media (max-width: 550px) {
+    .cart-table td:before {
+        min-width: 80px;
+        font-size: 12px;
+    }
+
+    .cart-table td {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cart-product {
+        flex-direction: column;
+        text-align: center;
+        width: 100%;
+    }
+
+    .cart-product-info {
+        text-align: center;
+    }
+}
+
+/* Loading State */
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Quantity input spinner removal */
+.quantity-input::-webkit-inner-spin-button,
+.quantity-input::-webkit-outer-spin-button {
+    opacity: 0.5;
+}
+
+.quantity-input {
+    -moz-appearance: textfield;
+}
+</style>
+
+<div class="cart-page">
+    <div class="cart-container">
+        <!-- Header -->
+        <div class="cart-header">
+            <div class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h1>ჩემი კალათა</h1>
+            <p>განახორციელეთ შეკვეთა სწრაფად და მარტივად</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if cart_items %}
+        <div class="cart-content">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>პროდუქტი</th>
+                        <th>ფასი</th>
+                        <th>რაოდენობა</th>
+                        <th>ჯამი</th>
+                        <th>მოქმედება</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td data-label="პროდუქტი">
+                            <div class="cart-product">
+                                <img class="cart-product-image" src="{{ url_for('static', filename=item.image) if item.image else 'https://via.placeholder.com/80x80?text=No+Image' }}" alt="{{ item.name }}">
+                                <div class="cart-product-info">
+                                    <h3>{{ item.name }}</h3>
+                                    {% if item.category %}
+                                    <span class="product-category">{{ item.category.name }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="ფასი" class="cart-price">₾{{ "%.2f"|format(item.price) }}</td>
+                        <td data-label="რაოდენობა">
+                            <form action="{{ url_for('update_cart', product_id=item.id) }}" method="POST" class="quantity-form">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="99" class="quantity-input" onchange="this.form.submit()">
+                            </form>
+                        </td>
+                        <td data-label="ჯამი" class="cart-subtotal">₾{{ "%.2f"|format(item.subtotal) }}</td>
+                        <td data-label="მოქმედება">
+                            <form action="{{ url_for('update_cart', product_id=item.id) }}" method="POST" onsubmit="return confirmRemove('{{ item.name }}')">
+                                <input type="hidden" name="quantity" value="0">
+                                <button type="submit" class="remove-btn">
+                                    <i class="fas fa-trash-alt"></i> წაშლა
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="cart-summary">
+                <div class="cart-total">
+                    <span>სულ გადასახდელი:</span>
+                    <span class="total-amount">₾{{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-actions">
+                    <a href="{{ url_for('shop') }}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> გაგრძელება
+                    </a>
+                    <a href="{{ url_for('checkout') }}" class="btn btn-gold">
+                        შეკვეთის გაფორმება <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h2>თქვენი კალათა ცარიელია</h2>
+            <p>როგორც ჩანს, ჯერ არაფერი დაგიმატებიათ კალათაში.</p>
+            <a href="{{ url_for('shop') }}" class="btn btn-gold">
+                <i class="fas fa-store"></i> შოპინგის დაწყება
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Confirm remove item
+function confirmRemove(productName) {
+    return confirm(`დარწმუნებული ხართ, რომ გსურთ "${productName}"-ის კალათიდან წაშლა?`);
+}
+
+// Auto-submit quantity form on enter (prevent accidental submits)
+document.querySelectorAll('.quantity-input').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.form.submit();
+        }
+    });
+
+    // Optional: Add debounce for auto-submit
+    let timeout;
+    input.addEventListener('change', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            this.form.submit();
+        }, 300);
+    });
+});
+
+// Add loading state to checkout button
+document.querySelector('.btn-gold')?.addEventListener('click', function(e) {
+    if (this.classList.contains('loading')) return;
+    this.classList.add('loading');
+});
+</script>
+{% endblock %}

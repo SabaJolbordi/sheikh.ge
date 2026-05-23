@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Sheikh.ge - ექსკლუზიური ბუტიკი{% endblock %}</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+:root {
+    --bg-main: #F8F6F2;
+    --gold: #C5A059;
+    --gold-hover: #A88948;
+    --gold-light: #E5C28E;
+    --gold-dark: #996515;
+    --text-main: #1A1A1A;
+    --text-secondary: #555;
+    --footer-bg: #0a0a0a;
+    --footer-text: #E8E8E8;
+    --danger: #dc3545;
+    --success: #28a745;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #e0e0e0; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* HEADER */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    padding: 15px 0;
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.header.scrolled {
+    padding: 10px 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* LOGO */
+.logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--text-main);
+    letter-spacing: 1px;
+    transition: var(--transition);
+}
+
+.logo span { color: var(--gold); }
+.logo:hover { opacity: 0.8; }
+
+/* SEARCH BAR */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: #F8F6F2;
+    border: 1px solid #E4E6EB;
+    border-radius: 40px;
+    padding: 5px 15px;
+    transition: var(--transition);
+}
+
+.search-bar:focus-within {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(197,160,89,0.1);
+    background: white;
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    width: 180px;
+    font-size: 13px;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+}
+
+.search-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px 5px 5px 10px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.search-btn:hover {
+    color: var(--gold);
+}
+
+/* SHOPPING BAG ICON */
+.cart-icon {
+    position: relative;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.cart-icon:hover {
+    color: var(--gold);
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: var(--gold);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* BURGER MENU BUTTON - 3 LINES */
+.burger-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 22px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    z-index: 1001;
+    transition: var(--transition);
+}
+
+.burger-menu span {
+    width: 100%;
+    height: 2px;
+    background: var(--text-secondary);
+    border-radius: 2px;
+    transition: var(--transition);
+}
+
+.burger-menu:hover span {
+    background: var(--gold);
+}
+
+.burger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.burger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* DESKTOP NAVIGATION */
+.desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+    white-space: nowrap;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gold);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.nav-link:hover { color: var(--gold); }
+
+/* ADMIN BADGE - GOLD OVAL */
+.admin-oval {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border-radius: 40px;
+    padding: 4px 14px;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(197,160,89,0.3);
+    transition: var(--transition);
+    margin-left: 5px;
+}
+
+.admin-oval i {
+    font-size: 11px;
+    color: white;
+}
+
+.admin-oval span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: white;
+    text-transform: uppercase;
+}
+
+.admin-oval:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(197,160,89,0.4);
+}
+
+/* BUTTONS */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 24px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    gap: 8px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid #ddd;
+    color: var(--text-main);
+}
+
+.btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+}
+
+.btn-gold {
+    background: var(--gold);
+    color: white;
+}
+
+.btn-gold:hover {
+    background: var(--gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(197,160,89,0.3);
+}
+
+/* USER INFO & AUTH BUTTONS */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.user-name i {
+    font-size: 14px;
+}
+
+/* SIDEBAR MENU */
+.sidebar-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 320px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    transition: right 0.3s ease;
+    box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebar-menu.open {
+    right: 0;
+}
+
+.sidebar-header {
+    padding: 25px;
+    border-bottom: 1px solid #F0EFEA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.sidebar-logo span {
+    color: var(--gold);
+}
+
+.sidebar-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.sidebar-close:hover {
+    color: var(--gold);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.sidebar-link i {
+    width: 24px;
+    color: var(--gold);
+    font-size: 16px;
+}
+
+.sidebar-link:hover {
+    background: rgba(197,160,89,0.08);
+    color: var(--gold);
+    padding-left: 25px;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: #F0EFEA;
+    margin: 15px 0;
+}
+
+/* Sidebar Search */
+.sidebar-search {
+    margin: 10px 0;
+    padding: 0 20px;
+}
+
+.sidebar-search-form {
+    display: flex;
+    align-items: center;
+    background: #F8F6F2;
+    border: 1px solid #E4E6EB;
+    border-radius: 40px;
+    padding: 8px 15px;
+    transition: var(--transition);
+}
+
+.sidebar-search-form:focus-within {
+    border-color: var(--gold);
+}
+
+.sidebar-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 5px 0;
+    font-size: 13px;
+    outline: none;
+}
+
+.sidebar-search-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.sidebar-search-btn:hover {
+    color: var(--gold);
+}
+
+/* Sidebar Logout Button */
+.sidebar-logout {
+    margin-top: 10px;
+    border-top: 1px solid #F0EFEA;
+    padding-top: 15px;
+}
+
+.sidebar-logout .sidebar-link {
+    color: var(--danger);
+}
+
+.sidebar-logout .sidebar-link i {
+    color: var(--danger);
+}
+
+.sidebar-logout .sidebar-link:hover {
+    background: rgba(220,53,69,0.1);
+    color: var(--danger);
+}
+
+/* OVERLAY */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* MAIN CONTENT */
+main {
+    padding-top: 80px;
+    min-height: 60vh;
+}
+
+/* FLASH MESSAGES */
+.flash-messages {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+}
+
+.flash-message {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-left: 3px solid;
+    animation: slideIn 0.3s ease;
+}
+
+.flash-message.success { border-left-color: var(--success); }
+.flash-message.error { border-left-color: var(--danger); }
+.flash-message.success i { color: var(--success); }
+.flash-message.error i { color: var(--danger); }
+
+.flash-text { flex: 1; font-size: 13px; }
+
+.flash-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #999;
+    transition: var(--transition);
+}
+
+.flash-close:hover { color: var(--danger); }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* FOOTER */
+.footer {
+    background: var(--footer-bg);
+    color: var(--footer-text);
+    margin-top: 80px;
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+}
+
+.footer-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 40px 40px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 50px;
+    margin-bottom: 50px;
+}
+
+.footer-col h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-col h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: var(--gold);
+}
+
+.footer-col p {
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.footer-col a {
+    display: block;
+    color: #aaa;
+    text-decoration: none;
+    margin: 10px 0;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.footer-col a:hover {
+    color: var(--gold);
+    transform: translateX(5px);
+}
+
+.social-icons {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.social-icon {
+    color: #aaa;
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.social-icon:hover {
+    color: var(--gold);
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 30px;
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+}
+
+/* BACK TO TOP */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background: var(--gold);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    z-index: 99;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    background: var(--gold-hover);
+    transform: translateY(-5px);
+}
+
+/* DESKTOP VIEW */
+@media (min-width: 1024px) {
+    .burger-menu {
+        display: none !important;
+    }
+
+    .desktop-nav {
+        display: flex !important;
+    }
+
+    .search-bar {
+        display: flex !important;
+    }
+}
+
+/* TABLET & MOBILE */
+@media (max-width: 1023px) {
+    .desktop-nav {
+        display: none !important;
+    }
+
+    .burger-menu {
+        display: flex;
+    }
+
+    .search-bar {
+        display: flex !important;
+    }
+
+    .header-content {
+        padding: 0 20px;
+    }
+
+    main {
+        padding-top: 75px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar-menu {
+        width: 85%;
+    }
+
+    .search-bar .search-input {
+        width: 120px;
+    }
+
+    .footer-main {
+        padding: 40px 20px 30px;
+    }
+
+    .footer-grid {
+        gap: 35px;
+    }
+
+    .flash-messages {
+        top: 80px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 550px) {
+    .search-bar .search-input {
+        width: 90px;
+    }
+
+    .search-bar {
+        padding: 5px 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header" id="header">
+    <div class="header-content">
+
+        <!-- Logo -->
+        <a href="{{ url_for('index') }}" class="logo">Sheikh<span>.ge</span></a>
+
+        <!-- Desktop Navigation -->
+        <div class="desktop-nav">
+            <a href="{{ url_for('index') }}" class="nav-link">მთავარი</a>
+            <a href="{{ url_for('shop') }}" class="nav-link">მაღაზია</a>
+            <a href="{{ url_for('about') }}" class="nav-link">ჩვენ შესახებ</a>
+            <a href="{{ url_for('contact') }}" class="nav-link">კონტაქტი</a>
+
+            {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                    დეშბორდი
+                    <span class="admin-oval">
+                        <i class="fas fa-crown"></i>
+                        <span>ADMIN</span>
+                    </span>
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="nav-link">შეკვეთები</a>
+                <a href="{{ url_for('admin_messages') }}" class="nav-link">
+                    შეტყობინებები
+                    {% set unread = unread_messages_count|default(0) %}
+                    {% if unread > 0 %}
+                        <span class="admin-oval" style="background: linear-gradient(135deg, var(--danger), #a71d2a);">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ unread }}</span>
+                        </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Search Bar -->
+        <form class="search-bar" action="{{ url_for('shop') }}" method="GET">
+            <input type="text" class="search-input" name="search" placeholder="ძებნა..." value="{{ request.args.get('search','') }}">
+            <button class="search-btn" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+
+        <!-- Cart Icon -->
+        <a href="{{ url_for('cart') }}" class="cart-icon">
+            <i class="fas fa-shopping-bag"></i>
+            {% set cart_count = session.get('cart', {})|length %}
+            {% if cart_count > 0 %}
+                <span class="cart-count">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+
+        <!-- Desktop Auth -->
+        <div class="desktop-nav" style="display: flex; gap: 15px; align-items: center;">
+            {% if current_user.is_authenticated %}
+                <span class="user-name">
+                    <i class="fas fa-user-circle"></i>
+                    {{ current_user.name.split()[0] }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline">გამოსვლა</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline">შესვლა</a>
+                <a href="{{ url_for('register') }}" class="btn btn-gold">რეგისტრაცია</a>
+            {% endif %}
+        </div>
+
+        <!-- Burger Menu Button -->
+        <button class="burger-menu" id="burgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+    </div>
+</header>
+
+<!-- Sidebar Menu -->
+<div class="sidebar-menu" id="sidebarMenu">
+    <div class="sidebar-header">
+        <a href="{{ url_for('index') }}" class="sidebar-logo">Sheikh<span>.ge</span></a>
+        <button class="sidebar-close" onclick="closeSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-nav">
+        <!-- Sidebar Search -->
+        <div class="sidebar-search">
+            <form class="sidebar-search-form" action="{{ url_for('shop') }}" method="GET">
+                <input type="text" class="sidebar-search-input" name="search" placeholder="ძებნა..." value="{{ request.args.get('search','') }}">
+                <button class="sidebar-search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Main Navigation -->
+        <a href="{{ url_for('index') }}" class="sidebar-link" onclick="closeSidebar()">
+            <i class="fas fa-home"></i> მთავარი
+        </a>
+        <a href="{{ url_for('shop') }}" class="sidebar-link" onclick="closeSidebar()">
+            <i class="fas fa-store"></i> მაღაზია
+        </a>
+        <a href="{{ url_for('about') }}" class="sidebar-link" onclick="closeSidebar()">
+            <i class="fas fa-info-circle"></i> ჩვენ შესახებ
+        </a>
+        <a href="{{ url_for('contact') }}" class="sidebar-link" onclick="closeSidebar()">
+            <i class="fas fa-envelope"></i> კონტაქტი
+        </a>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Cart -->
+        <a href="{{ url_for('cart') }}" class="sidebar-link" onclick="closeSidebar()">
+            <i class="fas fa-shopping-bag"></i> კალათა
+            {% set cart_count = session.get('cart', {})|length %}
+            {% if cart_count > 0 %}
+                <span style="margin-left: auto; background: var(--gold); color: white; padding: 0 8px; border-radius: 20px; font-size: 11px;">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+
+        <!-- Admin Section -->
+        {% if current_user.is_authenticated and current_user.is_admin %}
+            <div class="sidebar-divider"></div>
+            <div style="padding: 0 15px 10px;">
+                <span class="admin-oval" style="display: inline-flex;">
+                    <i class="fas fa-crown"></i>
+                    <span>ADMIN PANEL</span>
+                </span>
+            </div>
+            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-chalkboard-user"></i> დეშბორდი
+            </a>
+            <a href="{{ url_for('admin_orders') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-box"></i> შეკვეთები
+            </a>
+            <a href="{{ url_for('admin_messages') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-envelope"></i> შეტყობინებები
+                {% set unread = unread_messages_count|default(0) %}
+                {% if unread > 0 %}
+                    <span style="margin-left: auto; background: var(--danger); color: white; padding: 0 8px; border-radius: 20px; font-size: 11px;">{{ unread }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin_products') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-tag"></i> პროდუქტები
+            </a>
+            <a href="{{ url_for('admin_categories') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-folder"></i> კატეგორიები
+            </a>
+        {% endif %}
+
+        <!-- User Info & Logout -->
+        <div class="sidebar-divider"></div>
+
+        {% if current_user.is_authenticated %}
+            <div class="sidebar-link" style="cursor: default;">
+                <i class="fas fa-user-circle"></i>
+                <span>{{ current_user.name }}</span>
+            </div>
+            <div class="sidebar-logout">
+                <a href="{{ url_for('logout') }}" class="sidebar-link" onclick="closeSidebar()">
+                    <i class="fas fa-sign-out-alt"></i> გამოსვლა
+                </a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-sign-in-alt"></i> შესვლა
+            </a>
+            <a href="{{ url_for('register') }}" class="sidebar-link" onclick="closeSidebar()">
+                <i class="fas fa-user-plus"></i> რეგისტრაცია
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Overlay -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeSidebar()"></div>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-main">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h3>Sheikh.ge</h3>
+                <p>ექსკლუზიური ონლაინ ბუტიკი, სადაც ელეგანტურობა ხვდება ხარისხს.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>სწრაფი ლინკები</h3>
+                <a href="{{ url_for('shop') }}">მაღაზია</a>
+                <a href="{{ url_for('about') }}">ჩვენ შესახებ</a>
+                <a href="{{ url_for('contact') }}">კონტაქტი</a>
+            </div>
+            <div class="footer-col">
+                <h3>კონტაქტი</h3>
+                <p>📞 +995 555 123 456</p>
+                <p>✉️ info@sheikh.ge</p>
+                <p>📍 თბილისი, საქართველო</p>
+            </div>
+            <div class="footer-col">
+                <h3>სამუშაო საათები</h3>
+                <p>ორშაბათი - შაბათი</p>
+                <p>10:00 - 20:00</p>
+                <p style="color: #888;">კვირა - დასვენება</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sheikh.ge — ყველა უფლება დაცულია</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Back to Top -->
+<div class="back-to-top" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
+<!-- Flash Messages -->
+<div class="flash-messages" id="flashMessages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+                <i class="fas {% if category == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                <span class="flash-text">{{ message }}</span>
+                <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.getElementById('menuOverlay');
+    const burgerBtn = document.getElementById('burgerBtn');
+
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    burgerBtn.classList.toggle('active');
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.getElementById('menuOverlay');
+    const burgerBtn = document.getElementById('burgerBtn');
+
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    burgerBtn.classList.remove('active');
+}
+
+// Header scroll effect
+window.addEventListener('scroll', () => {
+    const header = document.getElementById('header');
+    const backToTop = document.getElementById('backToTop');
+
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+        backToTop.classList.add('show');
+    } else {
+        header.classList.remove('scrolled');
+        backToTop.classList.remove('show');
+    }
+});
+
+// Back to top
+document.getElementById('backToTop')?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Auto-hide flash messages
+document.querySelectorAll('.flash-message').forEach(flash => {
+    setTimeout(() => {
+        flash.style.opacity = '0';
+        setTimeout(() => flash.remove(), 300);
+    }, 5000);
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
